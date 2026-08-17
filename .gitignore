@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Original book files are the user's own copies — they stay local, never in the repo.
+*.epub
+*.pdf
+*.fb2
+*.mobi
+*.azw3
+*.djvu
