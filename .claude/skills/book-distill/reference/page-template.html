@@ -33,7 +33,7 @@ a{color:var(--stamp)}
 .skip{position:absolute;left:8px;top:-60px;z-index:70;background:var(--stamp);color:var(--paper);padding:10px 16px;border-radius:4px;text-decoration:none;font-size:14px}
 .skip:focus{top:8px}
 
-/* ---------- верхняя полоса ---------- */
+/* ---------- top bar ---------- */
 .topbar{
   position:fixed;inset:0 0 auto 0;height:var(--topbar-h);z-index:40;
   display:flex;align-items:center;gap:10px;padding:0 10px;
@@ -58,7 +58,7 @@ html.nav-open #menuBtn .ic-close{display:inline}
 .topbar .iconbtn.theme .lbl{display:none}
 @media (min-width:760px){.topbar .iconbtn.theme .lbl{display:inline}}
 
-/* ---------- боковое меню ---------- */
+/* ---------- left menu ---------- */
 .sidenav{
   position:fixed;left:0;top:var(--topbar-h);bottom:0;width:var(--side-w);z-index:50;
   background:var(--paper-2);border-right:1px solid var(--rule);
@@ -88,11 +88,11 @@ html.nav-open .sidenav{transform:none;visibility:visible}
   html.nav-open .shell{margin-left:var(--side-w)}
 }
 
-/* ---------- содержимое ---------- */
+/* ---------- content ---------- */
 .shell{padding-top:var(--topbar-h)}
 section{padding:60px 0;border-bottom:1px solid var(--rule);scroll-margin-top:calc(var(--topbar-h) + 10px)}
 
-/* ---------- шапка ---------- */
+/* ---------- masthead ---------- */
 .masthead{border-bottom:2px solid var(--ink);background:var(--paper-2)}
 .masthead .wrap{display:flex;flex-direction:column;gap:26px;padding-top:40px;padding-bottom:30px}
 .tag{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
@@ -106,7 +106,7 @@ section{padding:60px 0;border-bottom:1px solid var(--rule);scroll-margin-top:cal
 .ledger .n{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:20px;font-variant-numeric:tabular-nums;color:var(--stamp)}
 .ledger .l{font-size:12.5px;color:var(--ink-3);line-height:1.35}
 
-/* ---------- заголовки разделов ---------- */
+/* ---------- section headings ---------- */
 .sechead{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
 .sechead h2{font-size:clamp(27px,4vw,42px)}
 .sechead p{color:var(--ink-2);max-width:62ch}
@@ -121,7 +121,7 @@ h4{font-size:17px;font-family:"IBM Plex Sans",sans-serif;font-weight:600;letter-
 .mark.an{color:var(--ochre);border-color:var(--ochre)}
 .an-block{border-left:2px dotted var(--ochre);padding-left:14px;color:var(--ink-2)}
 
-/* ---------- пересказ ---------- */
+/* ---------- retelling: cast, scenes, timeline ---------- */
 .who{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 26px}
 .who div{padding:11px 0;border-top:1px solid var(--rule);font-size:15.5px;color:var(--ink-2)}
 .who b{color:var(--ink);font-weight:600}
@@ -138,7 +138,7 @@ h4{font-size:17px;font-family:"IBM Plex Sans",sans-serif;font-weight:600;letter-
 .time div{display:grid;grid-template-columns:110px 1fr;gap:18px;padding:9px 0;border-top:1px solid var(--rule);font-size:15.5px;color:var(--ink-2)}
 .time span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:var(--stamp);font-size:14px;padding-top:2px}
 
-/* ---------- пересказ по главам ---------- */
+/* ---------- retelling: one card per chapter ---------- */
 .chaps{display:flex;flex-direction:column;gap:14px}
 .chap{border:1px solid var(--rule);border-radius:10px;background:var(--card);padding:20px 22px;display:flex;flex-direction:column;gap:12px}
 .chap .cnum{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
@@ -152,7 +152,7 @@ h4{font-size:17px;font-family:"IBM Plex Sans",sans-serif;font-weight:600;letter-
 ol.selfcheck{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;color:var(--ink-2);max-width:70ch}
 ol.selfcheck li{padding-left:4px}
 
-/* ---------- схема: узлы и пути ---------- */
+/* ---------- graph: nodes, edges, paths ---------- */
 .flowbox{display:flex;flex-direction:column}
 .flowbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
 .flowbar .sw{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
@@ -221,7 +221,7 @@ ol.selfcheck li{padding-left:4px}
 .deeper .inner{padding:16px;display:flex;flex-direction:column;gap:14px}
 .deeper blockquote{margin:0;font-family:"Old Standard TT",Georgia,serif;font-style:italic;font-size:17px;border-left:2px solid var(--stamp);padding-left:14px}
 
-/* ветка: подпорки и возражения под опорой */
+/* branch: supports and objections under a pillar */
 .fbranch{position:relative;margin-left:26px;padding-left:26px;padding-top:4px;display:flex;flex-direction:column}
 .fbranch::before{content:"";position:absolute;left:0;top:0;bottom:26px;width:2px;background:var(--wire)}
 .fbranch.contra::before{background:repeating-linear-gradient(to bottom,var(--alarm) 0 5px,transparent 5px 11px)}
@@ -241,12 +241,12 @@ ol.selfcheck li{padding-left:4px}
   .fleaf::after{left:-4px}
 }
 
-/* режим «несущий путь» */
+/* "main path only" mode */
 .flow.only-main .fnode[data-path="side"],
 .flow.only-main .fedge.sec{opacity:.34}
 .flow.only-main .fnode[data-path="side"] .claim{color:var(--ink-3)}
 
-/* ---------- таблица ---------- */
+/* ---------- claim table ---------- */
 .tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:10px}
 table{border-collapse:collapse;width:100%;min-width:820px;font-size:14.5px}
 th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
@@ -256,7 +256,7 @@ tr.sup td{color:var(--ink-2)}
 tr.sup td.id{color:var(--ink-3)}
 [hidden]{display:none!important}
 
-/* ---------- цитаты ---------- */
+/* ---------- quotes ---------- */
 .qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
 .q{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .q blockquote{margin:0;font-family:"Old Standard TT",Georgia,serif;font-size:18.5px;line-height:1.42}
@@ -271,7 +271,7 @@ tr.sup td.id{color:var(--ink-3)}
 .tabs button:hover{border-color:var(--stamp);color:var(--stamp)}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-/* ---------- рецепция и разбор ---------- */
+/* ---------- reception and critique ---------- */
 .critic{border-top:1px solid var(--rule);padding:20px 0;display:flex;flex-direction:column;gap:9px}
 .critic .src{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.06em;color:var(--ink-3)}
 .critic h4{font-family:"Old Standard TT",Georgia,serif;font-size:20px;font-weight:700}
@@ -285,7 +285,7 @@ tr.sup td.id{color:var(--ink-3)}
 .acc .inner{padding:0 20px 20px;color:var(--ink-2);display:flex;flex-direction:column;gap:12px}
 .acc .inner ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px}
 
-/* ---------- повторение ---------- */
+/* ---------- recall: deck and quiz ---------- */
 .deck{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:18px;min-height:280px}
 .deck .meta{display:flex;justify-content:space-between;gap:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .deck .front{font-family:"Old Standard TT",Georgia,serif;font-size:clamp(20px,2.6vw,27px);line-height:1.3}
@@ -305,7 +305,7 @@ button.act.ghost:hover{border-color:var(--stamp);color:var(--stamp);opacity:1}
 .modeswitch button:hover{border-color:var(--stamp);color:var(--stamp)}
 .modeswitch button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-/* ---------- применение ---------- */
+/* ---------- apply: checkboxes ---------- */
 .todo{display:flex;flex-direction:column}
 .todo label{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--rule);cursor:pointer;color:var(--ink-2);min-height:52px}
 .todo input{margin-top:5px;accent-color:var(--stamp);width:18px;height:18px;flex:none}
@@ -317,7 +317,7 @@ footer a{color:var(--ink-2)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
-<a class="skip" href="#content">Перейти к содержанию</a>
+<a class="skip" href="#content">{{UI_SKIP}}</a>
 
 <div class="topbar">
   <button class="iconbtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidenav" aria-label="{{UI_MENU_OPEN}}">
@@ -354,14 +354,14 @@ footer a{color:var(--ink-2)}
   </div>
 </header>
 
-<section id="pereskaz">
+<section id="retelling">
   <div class="wrap">
 {{SECHEAD_1}}
 {{VIEW_PERESKAZ}}
   </div>
 </section>
 
-<section id="lestnica">
+<section id="pillars">
   <div class="wrap">
 {{SECHEAD_2}}
     <div class="flowbox" data-flow>
@@ -384,7 +384,7 @@ footer a{color:var(--ink-2)}
   </div>
 </section>
 
-<section id="karta">
+<section id="map">
   <div class="wrap">
 {{SECHEAD_3}}
     <div class="flowbox" data-flow data-viewswitch>
@@ -413,7 +413,7 @@ footer a{color:var(--ink-2)}
   </div>
 </section>
 
-<section id="citaty">
+<section id="quotes">
   <div class="wrap">
 {{SECHEAD_4}}
     <div class="tabs" role="group" aria-label="{{UI_TIERS}}">
@@ -428,21 +428,21 @@ footer a{color:var(--ink-2)}
   </div>
 </section>
 
-<section id="kritiki">
+<section id="reception">
   <div class="wrap">
 {{SECHEAD_5}}
 {{VIEW_KRITIKI}}
   </div>
 </section>
 
-<section id="razbor">
+<section id="critique">
   <div class="wrap">
 {{SECHEAD_6}}
 {{VIEW_RAZBOR}}
   </div>
 </section>
 
-<section id="povtorenie">
+<section id="recall">
   <div class="wrap">
 {{SECHEAD_7}}
     <div class="modeswitch" role="group" aria-label="{{UI_MODES}}">
@@ -463,14 +463,14 @@ footer a{color:var(--ink-2)}
   </div>
 </section>
 
-<section id="primenenie">
+<section id="apply">
   <div class="wrap">
 {{SECHEAD_8}}
 {{VIEW_PRIMENENIE}}
   </div>
 </section>
 
-<section id="svyazi">
+<section id="links">
   <div class="wrap">
 {{SECHEAD_9}}
 {{VIEW_SVYAZI}}
@@ -494,7 +494,7 @@ let state = Object.assign({missed:{}, seen:0, todo:{}, theme:null, nav:null}, st
 const save = () => store.write(state);
 const root = document.documentElement;
 
-/* --- тема --- */
+/* --- theme --- */
 if (state.theme) root.setAttribute("data-theme", state.theme);
 document.getElementById("themeBtn").addEventListener("click", () => {
   const dark = root.getAttribute("data-theme") === "dark" ||
@@ -504,7 +504,7 @@ document.getElementById("themeBtn").addEventListener("click", () => {
   save();
 });
 
-/* --- боковое меню --- */
+/* --- left menu --- */
 const menuBtn = document.getElementById("menuBtn"),
       sidenav = document.getElementById("sidenav"),
       scrim = document.getElementById("scrim");
@@ -525,7 +525,7 @@ document.addEventListener("keydown", e => {
 sidenav.addEventListener("click", e => { if (e.target.closest("a") && !wide()) setNav(false, false); });
 addEventListener("resize", () => { scrim.hidden = !root.classList.contains("nav-open") || wide(); });
 
-/* --- где мы сейчас --- */
+/* --- which section we are in --- */
 const links = Array.prototype.slice.call(document.querySelectorAll(".sidelist a"));
 const order = Array.prototype.slice.call(document.querySelectorAll("section[id]")).map(s => s.id);
 const visible = new Set();
@@ -541,7 +541,7 @@ if ("IntersectionObserver" in window){
   document.querySelectorAll("section[id]").forEach(s => io.observe(s));
 }
 
-/* --- схемы: пути, раскрытие, вид --- */
+/* --- graphs: paths, expand all, view switch --- */
 document.querySelectorAll("[data-flow]").forEach(box => {
   const flow = box.querySelector(".flow");
   box.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
@@ -562,7 +562,7 @@ document.querySelectorAll("[data-flow]").forEach(box => {
   });
 });
 
-/* --- цитаты --- */
+/* --- quotes --- */
 const grid = document.getElementById("qgrid");
 document.querySelectorAll(".tabs [data-tier]").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -583,7 +583,7 @@ grid.addEventListener("click", e => {
   if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fail); else fail();
 });
 
-/* --- колода --- */
+/* --- deck --- */
 const front = document.getElementById("front"),
       back = document.getElementById("back"),
       pos = document.getElementById("deckPos"),
@@ -682,7 +682,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 });
 pos.textContent = UI.card + " 1" + UI.of + CARDS.length;
 
-/* --- отметки в применении --- */
+/* --- checkboxes in apply --- */
 document.querySelectorAll("[data-todo] input").forEach((box, i) => {
   const key = "t" + i;
   if (state.todo[key]) box.checked = true;

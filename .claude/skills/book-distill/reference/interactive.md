@@ -37,29 +37,30 @@ published page is a bug. The slots fall into six groups:
 
 | Group | Slots | What goes in |
 |---|---|---|
-| Палитра | `PALETTE_LIGHT`, `PALETTE_DARK` | token values taken from the cover (see below) |
-| Шапка | `TITLE`, `TOPBAR_*`, `SIDE_*`, `NAV_ITEMS`, `KICKER`, `H1`, `SUBTITLE`, `BYLINE`, `THESIS`, `LEDGER`, `METALINE` | book identity and honest stats |
-| Подписи | every `UI_*` slot and `UI_JSON` | interface strings, translated into the pack's output language |
-| Разделы | `SECHEAD_1…9`, `VIEW_*` | the content of each section, built from the Markdown files |
-| Графы | `FLOW_SPINE`, `FLOW_MAP`, `FLOW_NOTE_SPINE`, `FLOW_NOTE_MAP`, `MAP_TABLE`, `MAP_NOTES` | the two node graphs and the table behind the map |
-| Данные | `QUOTES`, `CARDS_JSON`, `STORE_KEY`, `FOOTER` | generated from `quotes.md` and `anki.tsv`, never retyped |
+| Palette | `PALETTE_LIGHT`, `PALETTE_DARK` | token values taken from the cover (see below) |
+| Masthead | `TITLE`, `TOPBAR_*`, `SIDE_*`, `NAV_ITEMS`, `KICKER`, `H1`, `SUBTITLE`, `BYLINE`, `THESIS`, `LEDGER`, `METALINE` | book identity and honest stats |
+| Labels | every `UI_*` slot (including `UI_SKIP`) and `UI_JSON` | interface strings, translated into the pack's output language |
+| Sections | `SECHEAD_1…9`, `VIEW_*` | the content of each section, built from the Markdown files |
+| Graphs | `FLOW_SPINE`, `FLOW_MAP`, `FLOW_NOTE_SPINE`, `FLOW_NOTE_MAP`, `MAP_TABLE`, `MAP_NOTES` | the two node graphs and the table behind the map |
+| Data | `QUOTES`, `CARDS_JSON`, `STORE_KEY`, `FOOTER` | generated from `quotes.md` and `anki.tsv`, never retyped |
 
-Section ids, their order, the class names and the JavaScript are fixed. Translate the labels for a
-non-Russian pack; never rename an id, drop a section, or add one.
+Section ids, their order, the class names and the JavaScript are fixed. Section ids are English
+regardless of the pack language; the visible labels are translated with the pack. Never rename an
+id, drop a section, or add one.
 
 ## The nine sections
 
 | # | id | What it holds | Source file |
 |---|----|---------------|-------------|
-| 1 | `pereskaz` | overview, cast, book vocabulary, chapter-by-chapter retelling, key scenes with verbatim quotes, timeline | `retelling.md` |
-| 2 | `lestnica` | thesis + pillars as a node graph, each pillar opening in two steps | `spine.md` |
-| 3 | `karta` | the claim graph — supports and objections per pillar — with the table behind a switch | `argument-map.md` |
-| 4 | `citaty` | three tiers with a copy button each | `quotes.md` |
-| 5 | `kritiki` | documented critics with publication and date, sources at the end | `reception.md` |
-| 6 | `razbor` | adversarial read, verdict pinned first | `critique.md` |
-| 7 | `povtorenie` | flip deck + 10-card quiz, progress in `localStorage` | `cards.md` / `anki.tsv` |
-| 8 | `primenenie` | positions as checkboxes, experiments, what to stop doing | `apply.md` |
-| 9 | `svyazi` | agreements and contradictions with the other packs | `links.md` |
+| 1 | `retelling` | overview, cast, book vocabulary, chapter-by-chapter retelling, key scenes with verbatim quotes, timeline | `retelling.md` |
+| 2 | `pillars` | thesis + pillars as a node graph, each pillar opening in two steps | `spine.md` |
+| 3 | `map` | the claim graph — supports and objections per pillar — with the table behind a switch | `argument-map.md` |
+| 4 | `quotes` | three tiers with a copy button each | `quotes.md` |
+| 5 | `reception` | documented critics with publication and date, sources at the end | `reception.md` |
+| 6 | `critique` | adversarial read, verdict pinned first | `critique.md` |
+| 7 | `recall` | flip deck + 10-card quiz, progress in `localStorage` | `cards.md` / `anki.tsv` |
+| 8 | `apply` | positions as checkboxes, experiments, what to stop doing | `apply.md` |
+| 9 | `links` | agreements and contradictions with the other packs | `links.md` |
 
 Depth changes the volume inside these sections, never their number: `quick` fills them thinly and
 `deep` fills them densely, but the reader finds the same nine entries in the same order in every
@@ -80,33 +81,33 @@ Both are built out of the same four pieces, and both must stay inside normal doc
 absolute positioning of nodes, so nothing can overlap at any width.
 
 ```html
-<!-- узел -->
+<!-- node -->
 <details class="fnode" data-path="main|side" data-node="P1"><summary>
   <span class="col1">
-    <span class="pid">Опора P1 · гл. 0–2</span>
-    <span class="claim">…утверждение…</span>
-    <span class="chips"><span class="chip s-strong">факты — сильные</span></span>
+    <span class="pid">Pillar P1 · ch. 0–2</span>
+    <span class="claim">…the claim…</span>
+    <span class="chips"><span class="chip s-strong">evidence strong</span></span>
   </span><span class="chev">…svg…</span>
 </summary><div class="body">…</div></details>
 
-<!-- ребро между узлами: sec = пунктир, боковой путь -->
-<div class="fedge sec" aria-hidden="true"><span class="elabel">боковые опоры</span></div>
+<!-- edge between nodes: sec = dashed, a side path -->
+<div class="fedge sec" aria-hidden="true"><span class="elabel">side pillars</span></div>
 
-<!-- ветка внутри узла: без contra — подпорки, с contra — возражения -->
+<!-- branch inside a node: without contra it is supports, with contra objections -->
 <div class="fbranch contra">
-  <div class="fleaf"><span class="lid">против P1</span><span class="lclaim">…</span></div>
+  <div class="fleaf"><span class="lid">against P1</span><span class="lclaim">…</span></div>
 </div>
 ```
 
-- **`lestnica`** — a `.fnode.root` holding the thesis, then the pillars. Solid edges along the
+- **`pillars`** — a `.fnode.root` holding the thesis, then the pillars. Solid edges along the
   load-bearing chain, dashed edges to the side pillars. Every edge carries a label naming the step
-  («несущая опора», «перенос в сегодня»). The chain/side split is `[analysis]`; say so in
+  ("load-bearing pillar", "the jump to today"). The chain/side split is `[analysis]`; say so in
   `FLOW_NOTE_SPINE`.
-- **`karta`** — one node per pillar in numeric order, each holding a solid `.fbranch` of supports
+- **`map`** — one node per pillar in numeric order, each holding a solid `.fbranch` of supports
   and a dashed `.fbranch.contra` of objections, every objection labelled with the claim it attacks.
-  The table goes in `MAP_TABLE` behind the «схема / таблица» switch.
+  The table goes in `MAP_TABLE` behind the graph/table switch.
 
-The switches, the «раскрыть все» button and the legends are part of the template — do not rebuild
+The switches, the expand-all button and the legends are part of the template — do not rebuild
 them per book. Both graphs stay readable without colour: paths are labelled in words as well as
 drawn.
 
@@ -134,7 +135,7 @@ Mapping, in this order:
   passes 4.5:1 on `--card`, lightened for the dark theme until it passes 4.5:1 on `--paper`.
   If that colour is a red or crimson it collides with `--alarm`, which marks weak claims and
   objections: take the second colour instead and record the swap in `book.json`.
-- **`--ochre`** — the cover's second colour. Carries `[разбор]` marks and the side paths in the
+- **`--ochre`** — the cover's second colour. Carries `[analysis]` marks and the side paths in the
   graphs, so it must also clear 4.5:1 on `--paper`, `--paper-2` and `--card`.
 - **`--alarm`** — stays a warning red, distinct from both of the above.
 - **`--paper` / `--paper-2` / `--card`** — near-neutral, biased a few points toward the accent hue.
@@ -147,6 +148,17 @@ in `book.json`. Two books in the library must not end up with the same accent hu
 existing `book.json` files before settling on one.
 
 ## Verification before publishing
+
+0. Run the structural check — it is the one that makes "every book looks the same" a fact rather
+   than a promise:
+
+   ```bash
+   python3 .claude/skills/book-distill/scripts/page_lint.py library/<slug>/page.html
+   ```
+
+   It verifies the nine section ids and their order, every component the skeleton is built from,
+   one menu link per section, both theme blocks and the palette tokens, that nothing but Google
+   Fonts is loaded, tag balance, and that the inline script parses.
 
 1. Every `{{PLACEHOLDER}}` filled.
 2. `node --check` on the extracted `<script>`; open/close counts equal for `div`, `section`,

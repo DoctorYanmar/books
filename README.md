@@ -43,8 +43,8 @@ carries the pipeline and nothing else.
 ## The retelling
 
 The chapter retelling is written for someone who will never open the book, and it is held to a
-standard rather than to taste. Every chapter gets a claim-like heading, two to four блока instead
-of one paragraph, connectives that name a cause instead of «затем», a stated stake, and a line
+standard rather than to taste. Every chapter gets a claim-like heading, two to four blocks instead
+of one paragraph, connectives that name a cause instead of "then", a stated stake, and a line
 handing a question to the next chapter. `scripts/retell_lint.py` measures all of that — word
 budget, sentence length, density of names and numbers, chain openers, causal connectives, topic
 chaining — and pass 3 does not start until it is clean. The reasoning and the sources are in
@@ -53,27 +53,29 @@ chaining — and pass 3 does not start until it is clean. The reasoning and the 
 ## The page
 
 Every book gets the same page: one scroll, a collapsible left menu, and nine sections in a fixed
-order — **Пересказ · Лестница опор · Карта · Цитаты · Критики · Разбор · Повторение · Применение ·
-Связи**. The skeleton never changes from book to book, so the second pack reads like the first and
+order — **retelling · pillars · map · quotes · reception · critique · recall · apply · links**.
+The visible labels are translated with the pack; the ids and the order never change, so the second
+pack reads like the first and
 you never hunt for a section. Depth changes how densely the sections are filled; it never changes
 how many there are.
 
-Two of the nine are graphs rather than prose. **Лестница опор** draws the thesis as a root node and
+Two of the nine are graphs rather than prose. **Pillars** draws the thesis as a root node and
 the pillars as nodes below it: solid edges run along the load-bearing chain, dashed ones lead to
 the side pillars the thesis survives without, and every edge is labelled with the step it makes. A
-switch dims everything off the main path. **Карта** gives each pillar a node holding a solid branch
+switch dims everything off the main path. **Map** gives each pillar a node holding a solid branch
 of supports and a dashed branch of objections, each objection labelled with the claim it attacks;
 the dense table is still there behind a switch. Nodes are plain `<details>` elements in normal
 document flow — keyboard and deep links work, and nothing can overlap at any width.
 
 What *is* per book is the colour: the palette is taken from that edition's cover — dominant colour
-becomes the accent, the second colour carries the side paths and the `[разбор]` marks, the neutrals
+becomes the accent, the second colour carries the side paths and the `[analysis]` marks, the neutrals
 get biased toward the accent hue. One reserved hue: red already means *weak claim* on this page, so
 a red cover gives up its accent to the cover's second colour, and `book.json` records why. Two packs
 never look the same, and each looks like its book.
 
 The skeleton lives in `.claude/skills/book-distill/reference/page-template.html` and is committed
-with the pipeline. Pass 5 fills its placeholders and runs the
+with the pipeline; `scripts/page_lint.py` checks a built page against it — section ids and order,
+every component, the menu, both themes, tag balance, and that the script parses. Pass 5 fills its placeholders and runs the
 [`ui-ux-pro-max`](https://github.com/mrgoonie/ui-ux-pro-max-skill) skill, which is **required** for
 that pass — it carries the contrast, focus, touch-target and typography checks the page is held to,
 and its pre-delivery checklist gates publishing.

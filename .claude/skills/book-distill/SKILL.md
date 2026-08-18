@@ -150,20 +150,21 @@ the thesis:
 - `retelling/scenes` — 6–10 key scenes in close-up, each with a verbatim quote.
 - `retelling/timeline` — the order of events when the book scrambles it.
 - `retelling/self-check` — 3–5 questions the reader answers from memory before leaving the section,
-  one per микротема. The research is blunt: the gain comes from *producing* a summary, not reading
+  one per point. The research is blunt: the gain comes from *producing* a summary, not reading
   one, so the retelling must end by making the reader produce something.
 
 **The chapter retelling follows `reference/retelling-standard.md`, and it is not optional.** Two
 templates, chosen by what the chapter is:
 
-- **Template A, argumentative chapter** — `Утверждение` (the chapter's claim as a proposition, not
-  its topic) → `Как получилось` (situation, complication, answer, in the author's order) →
-  `Чем держится` (evidence bullets, each naming what it proves) → `Что осталось открытым` →
-  `Дальше` (the question handed to the next chapter).
-- **Template B, narrative chapter** — `Где мы` (only if the setting changed) → `Что происходит`
-  (the turn, built with «поэтому» and «но») → `Ставка` (what is lost if it fails) → `Дальше`.
+- **Template A, argumentative chapter** — `Claim` (the chapter's claim as a proposition, not its
+  topic) → `How it goes` (situation, complication, answer, in the author's order) →
+  `What holds it up` (evidence bullets, each naming what it proves) → `Left open` →
+  `Next` (the question handed to the next chapter).
+- **Template B, narrative chapter** — `Where we are` (only if the setting changed) →
+  `What happens` (the turn, built with "therefore" and "but") → `Stakes` (what is lost if it
+  fails) → `Next`. Labels are translated with the pack; the mapping lives in the standard.
 
-The unit is the микротема, not the chapter: split a chapter into 2–4 blocks, merge two thin
+The unit is the point, not the chapter: split a chapter into 2–4 blocks, merge two thin
 chapters into one entry. Chapter headings are claim-like — the book's own chapter title is not
 enough, because a title names a topic and the reader needs the point.
 
@@ -174,8 +175,8 @@ python3 .claude/skills/book-distill/scripts/retell_lint.py library/<slug>/retell
 ```
 
 It checks blocks per chapter, word budget, sentence length, density of names and numbers, chain
-openers («Затем», «Дальше», «Отдельно»…), causal connectives, topic chaining, the forward link, and
-that `[разбор]` never sits inside a `[книга]` block. It cannot see a lost микротема — list them from
+openers ("then", "next", "separately"…), causal connectives, topic chaining, the forward link, and
+that `[analysis]` never sits inside a `[book]` block. It cannot see a lost point — list them from
 `notes/` and confirm each one by eye.
 
 Templates for the other layers are in `reference/layers.md`. Only after all this comes the spine,
@@ -237,14 +238,14 @@ they already have. Do not rebuild them unless the user asks.
 **Two of the nine sections are graphs, not prose.** They are what makes the argument readable at a
 glance, so they are built the same way in every pack:
 
-- **«Лестница опор»** — one node per pillar, chained from a root node holding the thesis. Solid
+- **The pillars graph** — one node per pillar, chained from a root node holding the thesis. Solid
   edges run along the load-bearing chain; dashed edges lead to the side pillars, the ones the
   thesis survives without. Every edge carries a short label saying what the step is. A switch
-  above the graph dims the side pillars («несущий путь»), and one button opens or closes every
+  above the graph dims the side pillars ("main path only"), and one button opens or closes every
   node. Which pillars are load-bearing is an `[analysis]` call and is marked as one on the page.
-- **«Карта аргументации»** — one node per pillar; inside it a solid branch of supports and a
+- **The claim map** — one node per pillar; inside it a solid branch of supports and a
   dashed branch of objections, each objection labelled with the claim it attacks. The dense table
-  stays available behind a «схема / таблица» switch.
+  stays available behind a graph/table switch.
 
 Nodes are `<details>` elements: keyboard support, `Esc`, and deep linking come for free, and no
 absolute positioning means nothing can overlap at any width.
@@ -263,6 +264,16 @@ in `book.json`: the skeleton already spends red on weak claims and objections, s
 dominant colour is a red or crimson cannot supply the accent — take the cover's second colour, or
 a neighbour of it, and say in `book.json` why. Two books in the library must not share an accent
 hue.
+
+Before publishing, run the structural check:
+
+```bash
+python3 .claude/skills/book-distill/scripts/page_lint.py library/<slug>/page.html
+```
+
+It verifies the nine section ids and their order, every component the skeleton is built from, one
+menu link per section, both theme blocks, that nothing but Google Fonts is loaded, tag balance and
+that the script parses. A page that does not pass is not published.
 
 `reference/interactive.md` carries the slot list, the section-to-file mapping, the graph markup,
 the palette procedure and the verification steps. Record the returned URL in `book.json`.
@@ -406,11 +417,11 @@ The user can ask for a single stage instead of the whole pipeline:
 7. `input/` holds books that have not been ingested yet, nothing else. Pass 0 empties it by moving
    the file, never by copying or deleting it.
 8. Every page built from now on has the same nine sections in the same order, the same collapsible
-   left menu, and the same node graphs in «Лестница опор» and «Карта». Per book only the content,
+   left menu, and the same node graphs in the pillars and map sections. Per book only the content,
    the depth and the palette change — and the palette comes from that book's cover. The two packs
    that predate the skeleton, `1984` and `frankenstein`, keep their pages.
 9. The chapter retelling follows `reference/retelling-standard.md` and passes `retell_lint.py`
    before pass 3 starts. A chapter written as one dense paragraph, opening on a detail instead of a
-   claim and chained with «затем», is a defect however accurate it is.
+   claim and chained with "then", is a defect however accurate it is.
 10. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
    after the page turns out wrong.

@@ -44,12 +44,12 @@ Volume per depth — the same templates, three sizes:
 - **Concavity** — payoff curve bending down; small shocks hurt less than large shocks hurt more.
 
 ## Quotes
-> "Some things benefit from shocks; they thrive and grow when exposed to volatility."
+> "<a verbatim sentence copied from source/chapters/, never retyped from memory>"
 > — ch.3
 
 ## Tensions
-- `[analysis]` Contradicts ch.1's claim that fragility "cannot be quantified" — here he offers
-  a measurement procedure.
+- `[analysis]` Contradicts the claim in ch.1 that the property cannot be quantified — here the
+  author offers a measurement procedure.
 
 ## Open questions
 - `[analysis]` How is this distinguishable from plain convexity in options pricing?
@@ -71,9 +71,9 @@ Rules that keep it from turning into a blurb:
 
 - **Concrete over abstract.** Not "Winston struggles against the regime" but "Winston buys a diary
   in a junk shop, writes DOWN WITH BIG BROTHER, and understands he is already dead."
-- **Sequential.** Follow the book's own order, part by part, chapter by chapter. Two to three
-  sentences per chapter at `standard`, five to eight at `deep`, part-level shape only at `quick` —
-  enough to see the scene, never a paraphrase of every paragraph.
+- **Sequential.** Follow the book's own order, part by part, chapter by chapter. The shape of a
+  chapter entry, its word budget and the checks it must pass are set by
+  `reference/retelling-standard.md`; do not invent a shape here.
 - **The ending is told.** A study pack is not a bookshop. Withholding the ending makes the analysis
   impossible to follow.
 - **Names, objects, numbers.** The junk shop, the paperweight, room 101, the rats. Concrete nouns
@@ -82,32 +82,38 @@ Rules that keep it from turning into a blurb:
   and the critique; mixing the two is what makes summaries feel like they explain nothing.
 
 ```markdown
-# О чём книга
+# What the book is
 
-**Мир и завязка:** <2–4 фразы: место, время, положение героя>
-**Форма:** <части, объём, кто рассказывает, есть ли вставные тексты>
-**Чем кончается:** <прямо, без утайки>
-**Если читать в оригинале:** <кому и какие главы>
+**Setting and premise:** <2–4 sentences: place, time, where the protagonist stands>
+**Shape:** <parts, length, who narrates, whether there are embedded texts>
+**How it ends:** <plainly, nothing withheld>
+**If you read the original:** <for whom, and which chapters>
 
-## Кто есть кто
-- **<имя>** — <кто такой и какую работу выполняет в сюжете>
+## Cast
+- **<name>** — <who they are and what work they do in the story>
 
-## Устройство мира
-- **<институт/термин>** — <что это и как работает>
+## How the world works
+- **<institution / term>** — <what it is and how it works>
 
-## Пересказ
-### Часть первая
-**Глава 1.** <2–5 фраз с конкретными событиями>
-**Глава 2.** …
+## Retelling
+### Chapter 1 · <claim-like title>
+<the slots from retelling-standard.md: Claim / How it goes / What holds it up / Left open / Next,
+or Where we are / What happens / Stakes / Next for a narrative chapter>
 
-## Ключевые сцены
-### <название сцены> · гл. N
-<что происходит, 3–6 фраз>
-> «дословная цитата»
+## Key scenes
+### <scene title> · ch. N
+<what happens, 3–6 sentences>
+> «verbatim quote»
 
-## Хронология
-- <событие> — <когда>
+## Timeline
+- <event> — <when>
+
+## Self-check
+<3–5 questions at quick and standard, 6–10 at deep; the answer is a claim, not a name>
 ```
+
+Headings and slot labels are translated with the pack — see the table in
+`reference/retelling-standard.md`.
 
 ## spine.md — the 10-minute read
 
@@ -214,30 +220,30 @@ Researched, never recalled. Every entry carries a name, a place of publication a
 quotation is short and verified against a source fetched during the run. Sources listed at the end.
 
 ```markdown
-# Что говорили критики
+# What the critics said
 
-## Современники, <год>
-**<Имя>** · <издание, дата>
-<позиция в 2–4 фразах; короткая цитата, если она проверена>
-`[разбор]` <по какой опоре бьёт это возражение и попадает ли>
+## Contemporaries, <year>
+**<Name>** · <publication, date>
+<the position in 2–4 sentences; a short quote if it was verified>
+`[analysis]` <which pillar this objection hits, and whether it lands>
 
-## Спор о том, что это за книга
-<крупные несогласные: идеологические, жанровые, источниковедческие>
+## The argument about what kind of book this is
+<the substantial dissenters: ideological, generic, source-critical>
 
-## Писатели-наследники
-<кто ответил книгой или эссе>
+## Writers who answered it
+<who replied with a book or an essay>
 
-## Судьба книги на языке читателя
-<переводы, издания, цензура, расхождения в терминах>
+## The book in the reader's own language
+<translations, editions, censorship, differences in terminology>
 
-## Вторая жизнь в новостях
-<когда и почему книгу перечитывали массово>
+## Second life in the news
+<when and why the book was read en masse again>
 
-## Как расходятся линии спора
-<3–5 строк: спор о механике / о жанре / об источнике / защита изнутри текста>
+## How the lines of argument split
+<3–5 lines: the argument about the mechanism / the genre / the sources / a defence from inside the text>
 
-## Источники
-<перечень использованных публикаций>
+## Sources
+<the publications actually used>
 ```
 
 Hard rules: no unsourced opinion attributed to a named person; no quotation longer than a phrase;

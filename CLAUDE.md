@@ -49,22 +49,23 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   `input/`, and never leave a copy behind there.
 
 - **The chapter retelling follows `reference/retelling-standard.md`.** Claim-first heading, two to
-  four микротемы per chapter instead of one wall, «поэтому/но» instead of «затем», a stated stake
+  four points per chapter instead of one wall, causal connectives instead of "then", a stated stake
   and a link to the next chapter. `scripts/retell_lint.py` gates it before pass 3: it measures
   blocks, word budget, sentence length, density of names and numbers, chain openers, causal
   connectives and topic chaining. Fix the prose, never the limit.
 
 - **Every page has the same skeleton.** `library/<slug>/page.html` is built from
   `.claude/skills/book-distill/reference/page-template.html`: one scroll, a collapsible left menu,
-  and the same nine sections in the same order — `pereskaz`, `lestnica`, `karta`, `citaty`,
-  `kritiki`, `razbor`, `povtorenie`, `primenenie`, `svyazi` — with the same components and the same
+  and the same nine sections in the same order — `retelling`, `pillars`, `map`, `quotes`,
+  `reception`, `critique`, `recall`, `apply`, `links` — with the same components and the same
   JavaScript. Per book only the content, the depth and the palette change. Never design a page
-  layout per book. `1984` and `frankenstein` predate the skeleton and keep their pages.
+  layout per book. `scripts/page_lint.py` checks this before publishing. `1984` and `frankenstein`
+  predate the skeleton and keep their pages.
 
-- **«Лестница опор» and «Карта» are node graphs, not lists.** Pillars are `<details>` nodes joined
+- **The pillars and map sections are node graphs, not lists.** Pillars are `<details>` nodes joined
   by labelled edges: solid along the load-bearing chain, dashed to the side pillars and to
   objections. Both graphs carry a path switch and an open-all button, and the map keeps the table
-  behind a «схема / таблица» switch. Markup and behaviour come from the template — never per book.
+  behind a graph/table switch. Markup and behaviour come from the template — never per book.
 
 - **The palette comes from the book's cover** — dominant colour to `--stamp`, second colour to
   `--ochre`, neutrals biased toward the accent hue, contrast computed in both themes (text ≥4.5:1,

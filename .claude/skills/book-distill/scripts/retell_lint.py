@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Проверка пересказа на механику ясности.
+"""Mechanical check for a chapter retelling.
 
-Читает раздел «## Пересказ» файла retelling.md и меряет каждую главу против
-жёстких пределов из reference/retelling-standard.md. Мера механическая: линтер
-не видит, потеряна ли микротема, — это остаётся человеческой проверкой.
+Reads the retelling section of retelling.md and measures every chapter against the hard
+limits in reference/retelling-standard.md. The check is mechanical: it cannot see whether
+a unit of meaning was dropped, so that stays a human check.
 
-    python3 retell_lint.py library/<slug>/retelling.md [--depth quick|standard|deep]
+    python3 retell_lint.py library/<slug>/retelling.md [--depth quick|standard|deep] [--lang en|ru]
 
-Выход 0 — нарушений нет; 1 — есть.
+Exit 0 when nothing is violated, 1 otherwise.
+
+A pack is written in the book's own language, so slot labels and connective lists are per
+language. Add a language by extending LANGS below; the limits themselves are shared.
 """
 
 import argparse
 import re
 import sys
 
+# Word budget per chapter. Template A is an argumentative chapter, B a narrative one.
 BUDGET = {
     "A": {"quick": (90, 140), "standard": (140, 220), "deep": (190, 300)},
     "B": {"quick": (50, 80), "standard": (80, 130), "deep": (90, 180)},
@@ -22,35 +26,60 @@ BUDGET = {
 
 MAX_AVG_SENTENCE = 20
 MAX_SENTENCE = 30
-MAX_ENTITY_DENSITY = {"A": 11.0, "B": 10.0}   # имён и чисел на 100 слов
-MAX_FIRST_SENTENCE = 25           # слов
+MAX_ENTITY_DENSITY = {"A": 11.0, "B": 10.0}   # names and numbers per 100 words
+MAX_FIRST_SENTENCE = 25                       # words
 MAX_FIRST_ENTITIES = 2
-SENTENCES_PER_CAUSAL = 3          # хотя бы одна причинная связка на столько предложений
+SENTENCES_PER_CAUSAL = 3                      # at least one causal link per N sentences
 MIN_TOPIC_CHAIN = 0.20
 
-CHAIN_OPENERS = [
-    "затем", "дальше", "далее", "потом", "отдельно", "также",
-    "в конце главы", "после этого", "кроме того", "наконец",
-]
-CAUSAL = [
-    "поэтому", "потому что", "из-за", "благодаря", "следовательно", "значит",
-    "но ", "однако", "зато", "хотя", "если", "чтобы", "оттого", "иначе",
-    "в результате", "вследствие", "тем самым", "а не ",
-]
-LINKERS = ("поэтому", "потому", "но", "однако", "зато", "хотя", "если",
-           "значит", "следовательно", "иначе", "оттого", "тем")
+LANGS = {
+    "en": {
+        "heading": "## Retelling",
+        "claim": "**Claim.**",
+        "happens": "**What happens.**",
+        "next": "**Next.**",
+        "analysis": "analysis",
+        # openers that chain events instead of connecting them
+        "chain": ["then", "next", "after that", "later", "also", "separately",
+                  "at the end of the chapter", "furthermore", "finally"],
+        # markers of cause, consequence or contrast
+        "causal": ["because", "therefore", "so that", "which is why", "as a result",
+                   "but ", "however", "although", "if ", "since ", "thus", "hence",
+                   "otherwise", "rather than"],
+        # words that tie a sentence to the previous one when they open it
+        "linkers": ("because", "therefore", "but", "however", "although", "if",
+                    "so", "thus", "hence", "that", "this", "these", "otherwise"),
+    },
+    "ru": {
+        "heading": "## Пересказ",
+        "claim": "**Утверждение.**",
+        "happens": "**Что происходит.**",
+        "next": "**Дальше.**",
+        "analysis": "разбор",
+        "chain": ["затем", "дальше", "далее", "потом", "отдельно", "также",
+                  "в конце главы", "после этого", "кроме того", "наконец"],
+        "causal": ["поэтому", "потому что", "из-за", "благодаря", "следовательно",
+                   "значит", "но ", "однако", "зато", "хотя", "если", "чтобы",
+                   "оттого", "иначе", "в результате", "вследствие", "тем самым", "а не "],
+        "linkers": ("поэтому", "потому", "но", "однако", "зато", "хотя", "если",
+                    "значит", "следовательно", "иначе", "оттого", "тем"),
+    },
+}
 
-LABEL_A = "**Утверждение.**"
-LABEL_B = "**Что происходит.**"
-LABEL_FORWARD = "**Дальше.**"
 LABELS = re.compile(r"\*\*[^*]+\.\*\*\s*")
-
 WORD = re.compile(r"[^\W\d_]+", re.UNICODE)
 
 
+def detect_lang(md):
+    for code, cfg in LANGS.items():
+        if cfg["heading"] in md or cfg["claim"] in md or cfg["happens"] in md:
+            return code
+    return "en"
+
+
 def strip_markup(text):
-    text = re.sub(r"^>.*$", "", text, flags=re.M)          # блок разбора не считаем
-    text = LABELS.sub("", text)                            # метки слотов не текст
+    text = re.sub(r"^>.*$", "", text, flags=re.M)          # the analysis block is not counted
+    text = LABELS.sub("", text)                            # slot labels are not prose
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     text = re.sub(r"[*_`]", "", text)
     text = re.sub(r"^\s*[-–—]\s*", "", text, flags=re.M)
@@ -67,9 +96,9 @@ def words(text):
 
 
 def entities(text):
-    """Имена собственные и числа. Слово с заглавной не в начале предложения."""
+    """Proper nouns and numbers: a capitalised word that does not open a sentence."""
     found = set()
-    text = re.sub(r"«[^»]*»", " ", text)                   # цитаты не считаем за имена
+    text = re.sub(r"«[^»]*»|\"[^\"]*\"", " ", text)        # quotations are not names
     for sent in sentences(text):
         toks = re.findall(r"[^\s]+", sent)
         for i, tok in enumerate(toks):
@@ -78,62 +107,59 @@ def entities(text):
                 continue
             if bare[0].isupper() and bare[0].isalpha():
                 found.add(bare)
-    nums = re.findall(r"\d+", text)
-    return len(found) + len(nums)
+    return len(found) + len(re.findall(r"\d+", text))
 
 
-def share(text, markers):
+def count_markers(text, markers):
     low = " " + text.lower() + " "
     return sum(low.count(m) for m in markers)
 
 
-def topic_chain(sents):
-    """Доля предложений прозы, зацепленных за предыдущее: общим словом в начале либо связкой.
+def topic_chain(sents, linkers):
+    """Share of prose sentences tied to the previous one, by a shared word or a connective.
 
-    Считается только по сплошному тексту: пункты перечня стоят рядом как равные,
-    и сцеплять их между собой не нужно."""
+    Measured on running text only: items in a bullet list stand side by side as equals and
+    are not meant to chain."""
     if len(sents) < 2:
         return 1.0
     hits = 0
     for i in range(1, len(sents)):
         prev = {w.lower()[:5] for w in words(sents[i - 1]) if len(w) > 3}
-        cur_words = [w for w in words(sents[i]) if len(w) > 3]
-        head = [w.lower()[:5] for w in cur_words[:5]]
+        head = [w.lower()[:5] for w in words(sents[i]) if len(w) > 3][:5]
         first = (words(sents[i]) or [""])[0].lower()
-        if any(w in prev for w in head) or first in LINKERS:
+        if any(w in prev for w in head) or first in linkers:
             hits += 1
     return hits / (len(sents) - 1)
 
 
-def split_chapters(md):
-    body = md.split("## Пересказ", 1)
-    if len(body) < 2:
+def split_chapters(md, cfg):
+    if cfg["heading"] not in md:
         return []
-    body = re.split(r"\n## ", body[1])[0]
-    chunks = re.split(r"\n### ", body)
+    body = re.split(r"\n## ", md.split(cfg["heading"], 1)[1])[0]
     out = []
-    for chunk in chunks[1:]:
+    for chunk in re.split(r"\n### ", body)[1:]:
         lines = chunk.split("\n")
         out.append((lines[0].strip(), "\n".join(lines[1:]).strip()))
     return out
 
 
-def check(raw, depth):
+def check(raw, depth, cfg):
     problems = []
-    kind = "A" if LABEL_A in raw else ("B" if LABEL_B in raw else None)
+    kind = "A" if cfg["claim"] in raw else ("B" if cfg["happens"] in raw else None)
     if kind is None:
-        problems.append("нет слота «Утверждение.» или «Что происходит.» — глава не по шаблону")
+        problems.append("no %s or %s slot — the chapter follows neither template"
+                        % (cfg["claim"], cfg["happens"]))
         kind = "A"
 
     blocks = [b for b in re.split(r"\n\s*\n", raw) if b.strip()]
     if len(blocks) < 2:
-        problems.append("один блок на главу — стена; нужно минимум два (ИК3)")
+        problems.append("one block per chapter — a wall; at least two are required")
 
     text = strip_markup(raw)
     ws = words(text)
     lo, hi = BUDGET[kind][depth]
     if not (lo <= len(ws) <= hi):
-        problems.append("объём %d слов вне диапазона %d–%d для шаблона %s/%s"
+        problems.append("%d words, outside %d-%d for template %s at %s"
                         % (len(ws), lo, hi, kind, depth))
 
     sents = sentences(text)
@@ -141,54 +167,50 @@ def check(raw, depth):
         lens = [len(words(s)) for s in sents]
         avg = sum(lens) / len(lens)
         if avg > MAX_AVG_SENTENCE:
-            problems.append("средняя длина предложения %.1f > %d" % (avg, MAX_AVG_SENTENCE))
+            problems.append("average sentence %.1f words > %d" % (avg, MAX_AVG_SENTENCE))
         if max(lens) > MAX_SENTENCE:
-            problems.append("самое длинное предложение %d слов > %d" % (max(lens), MAX_SENTENCE))
+            problems.append("longest sentence %d words > %d" % (max(lens), MAX_SENTENCE))
 
     dens = entities(text) / max(1, len(ws)) * 100
     if dens > MAX_ENTITY_DENSITY[kind]:
-        problems.append("плотность имён и чисел %.1f на 100 слов > %.0f"
+        problems.append("%.1f names and numbers per 100 words > %.0f"
                         % (dens, MAX_ENTITY_DENSITY[kind]))
 
-    label = LABEL_A if kind == "A" else LABEL_B
+    label = cfg["claim"] if kind == "A" else cfg["happens"]
     m = re.search(re.escape(label) + r"\s*(.+)", raw)
     if m:
         first = sentences(strip_markup(m.group(1)))
         if first:
-            fw = len(words(first[0]))
-            fe = entities(first[0])
+            fw, fe = len(words(first[0])), entities(first[0])
             if fw > MAX_FIRST_SENTENCE:
-                problems.append("первое предложение %d слов > %d" % (fw, MAX_FIRST_SENTENCE))
+                problems.append("opening sentence %d words > %d" % (fw, MAX_FIRST_SENTENCE))
             if fe > MAX_FIRST_ENTITIES:
-                problems.append("первое предложение несёт %d имён и чисел > %d — это опись, не утверждение"
-                                % (fe, MAX_FIRST_ENTITIES))
+                problems.append("opening sentence carries %d names and numbers > %d — "
+                                "an inventory, not a claim" % (fe, MAX_FIRST_ENTITIES))
 
-    low = text.lower()
-    for opener in CHAIN_OPENERS:
-        for s in sents:
-            if s.lower().startswith(opener):
-                problems.append("предложение открывается связкой-цепочкой «%s»" % opener)
-                break
+    for opener in cfg["chain"]:
+        if any(s.lower().startswith(opener) for s in sents):
+            problems.append('a sentence opens with the chaining word "%s"' % opener)
 
-    ca = share(low, CAUSAL)
+    causal = count_markers(text.lower(), cfg["causal"])
     need = max(1, len(sents) // SENTENCES_PER_CAUSAL)
-    if ca < need:
-        problems.append("причинных связок %d при %d предложениях — нужно хотя бы %d, иначе цепочка «и потом»"
-                        % (ca, len(sents), need))
+    if causal < need:
+        problems.append("%d causal links across %d sentences — at least %d needed, "
+                        "otherwise it reads as and-then chaining" % (causal, len(sents), need))
 
-    prose = re.sub(r"^\s*[-–—].*$", "", raw, flags=re.M)   # списки не цепочка, а перечень
-    chain = topic_chain(sentences(strip_markup(prose)))
+    prose = re.sub(r"^\s*[-–—].*$", "", raw, flags=re.M)   # bullets are a list, not a chain
+    chain = topic_chain(sentences(strip_markup(prose)), cfg["linkers"])
     if chain < MIN_TOPIC_CHAIN:
-        problems.append("сцепка тем %.0f%% < %.0f%% — каждое предложение о новом"
+        problems.append("topic chaining %.0f%% < %.0f%% — every sentence starts a new subject"
                         % (chain * 100, MIN_TOPIC_CHAIN * 100))
 
-    if LABEL_FORWARD not in raw:
-        problems.append("нет слота «Дальше.» — глава не связана со следующей")
+    if cfg["next"] not in raw:
+        problems.append("no %s slot — the chapter is not tied to the one after it" % cfg["next"])
 
-    analysis_outside = [ln for ln in raw.split("\n")
-                        if "разбор" in ln.lower() and not ln.lstrip().startswith(">")]
-    if analysis_outside:
-        problems.append("«разбор» вне цитатного блока — слои книги и разбора смешаны")
+    stray = [ln for ln in raw.split("\n")
+             if cfg["analysis"] in ln.lower() and not ln.lstrip().startswith(">")]
+    if stray:
+        problems.append("analysis outside its quoted block — the book's claims and ours are mixed")
 
     return len(ws), problems
 
@@ -197,28 +219,33 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("path")
     ap.add_argument("--depth", default="standard", choices=("quick", "standard", "deep"))
+    ap.add_argument("--lang", default=None, choices=sorted(LANGS))
     args = ap.parse_args()
 
     md = open(args.path, encoding="utf-8").read()
-    chapters = split_chapters(md)
+    lang = args.lang or detect_lang(md)
+    cfg = LANGS[lang]
+
+    chapters = split_chapters(md, cfg)
     if not chapters:
-        print("не найден раздел «## Пересказ» с главами уровня ###")
+        print('no "%s" section with ### chapters found (language: %s)' % (cfg["heading"], lang))
         return 1
 
     total, bad = 0, 0
     for title, raw in chapters:
-        n, problems = check(raw, args.depth)
+        n, problems = check(raw, args.depth, cfg)
         total += n
         if problems:
             bad += 1
-            print("\n%s  (%d слов)" % (title, n))
+            print("\n%s  (%d words)" % (title, n))
             for p in problems:
-                print("   · " + p)
+                print("   . " + p)
 
-    print("\nглав: %d · слов в пересказе: %d · глав с нарушениями: %d"
-          % (len(chapters), total, bad))
+    print("\nlanguage: %s . chapters: %d . words in the retelling: %d . chapters with problems: %d"
+          % (lang, len(chapters), total, bad))
     if not bad:
-        print("механика чистая. Микротемы проверяются глазами: сверьте список из notes/.")
+        print("mechanics are clean. Units of meaning stay a human check: "
+              "list them from notes/ and confirm each one appears.")
     return 1 if bad else 0
 
 

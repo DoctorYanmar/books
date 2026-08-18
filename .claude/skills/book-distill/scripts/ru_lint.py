@@ -23,35 +23,35 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 
 BANNED = [
-    (r"\bявля(ется|ются|лся|лись)\b", "канцелярит", "заменить на тире или глагол действия"),
-    (r"\bпредставля(ет|ют) собой\b", "канцелярит", "это / — "),
-    (r"\bосуществля(ть|ет|ется|лся)\b", "канцелярит", "конкретный глагол: делает, проводит, ведёт"),
-    (r"\bданн(ый|ая|ое|ые|ого|ой|ом|ых)\b(?!\s+(?:о|по))", "канцелярит", "этот / эта / это"),
-    (r"\bв рамках\b", "канцелярит", "в / при / внутри"),
-    (r"\bпосредством\b", "канцелярит", "через / с помощью"),
-    (r"\bввиду того,? что\b", "канцелярит", "потому что / раз"),
+    (r"\bявля(ется|ются|лся|лись)\b", "bureaucratese", "use a dash or an action verb"),
+    (r"\bпредставля(ет|ют) собой\b", "bureaucratese", "это / —"),
+    (r"\bосуществля(ть|ет|ется|лся)\b", "bureaucratese", "a concrete verb: делает, проводит, ведёт"),
+    (r"\bданн(ый|ая|ое|ые|ого|ой|ом|ых)\b(?!\s+(?:о|по))", "bureaucratese", "этот / эта / это"),
+    (r"\bв рамках\b", "bureaucratese", "в / при / внутри"),
+    (r"\bпосредством\b", "bureaucratese", "через / с помощью"),
+    (r"\bввиду того,? что\b", "bureaucratese", "потому что / раз"),
     (r"\b(важно|стоит|следует|необходимо)\s+(отметить|подчеркнуть|понимать|заметить)\b",
-     "ватная вводная", "убрать целиком - утверждение обойдётся без анонса"),
-    (r"\bнельзя не отметить\b", "ватная вводная", "убрать"),
-    (r"\bдавайте\s+(разберёмся|разберемся|посмотрим)\b", "инфостиль", "убрать"),
-    (r"\bглубок(ое|ий)\s+(погружени|анализ)", "штамп", "сказать, что именно разбирается"),
-    (r"\bключев(ой|ая|ое|ые)\s+(момент|роль|аспект)", "штамп", "назвать вещь своим именем"),
-    (r"\bна самом деле\b", "штамп-усилитель", "убрать"),
-    (r"\bпо сути\b", "штамп-усилитель", "убрать"),
-    (r"\bкрасной нитью\b", "штамп", "убрать"),
-    (r"\bне просто [^.,;]{1,40},? а\b", "штамп-конструкция", "сказать прямо, что это"),
+     "padding opener", "delete it; the claim does not need an announcement"),
+    (r"\bнельзя не отметить\b", "padding opener", "delete"),
+    (r"\bдавайте\s+(разберёмся|разберемся|посмотрим)\b", "blog-speak", "delete"),
+    (r"\bглубок(ое|ий)\s+(погружени|анализ)", "cliche", "name what is actually being examined"),
+    (r"\bключев(ой|ая|ое|ые)\s+(момент|роль|аспект)", "cliche", "call the thing by its name"),
+    (r"\bна самом деле\b", "cliche intensifier", "delete"),
+    (r"\bпо сути\b", "cliche intensifier", "delete"),
+    (r"\bкрасной нитью\b", "cliche", "delete"),
+    (r"\bне просто [^.,;]{1,40},? а\b", "cliche construction", "say plainly what it is"),
     (r"\b(очень|крайне|поистине|буквально|действительно|просто-напросто)\b",
-     "мусорный усилитель", "убрать или заменить точной мерой"),
-    (r"\b(челлендж|драйвер|инсайт|нарратив)\b", "калька", "русский эквивалент"),
-    (r"\bадресовать\s+(проблему|вопрос|риск)", "калька", "заняться / решить / ответить на"),
-    (r"\bимеет место\b", "канцелярит", "происходит / есть"),
-    (r"\bв конечном (счете|счёте)\b", "штамп", "убрать"),
+     "empty intensifier", "delete, or give an exact measure"),
+    (r"\b(челлендж|драйвер|инсайт|нарратив)\b", "calque", "use the Russian equivalent"),
+    (r"\bадресовать\s+(проблему|вопрос|риск)", "calque", "заняться / решить / ответить на"),
+    (r"\bимеет место\b", "bureaucratese", "происходит / есть"),
+    (r"\bв конечном (счете|счёте)\b", "cliche", "delete"),
 ]
 
 TYPOGRAPHY = [
-    (r'"[А-Яа-яЁё]', "английские кавычки", "«ёлочки»"),
-    (r"[А-Яа-яЁё]\s-\s[А-Яа-яЁё]", "дефис вместо тире", "длинное тире —"),
-    (r"\d{1,3},\d{3}\b", "английский разделитель разрядов", "78 140, не 78,140"),
+    (r'"[А-Яа-яЁё]', "English quotation marks", "use «guillemets»"),
+    (r"[А-Яа-яЁё]\s-\s[А-Яа-яЁё]", "hyphen where a dash belongs", "use an em dash —"),
+    (r"\d{1,3},\d{3}\b", "English thousands separator", "78 140, not 78,140"),
 ]
 
 NOMINAL = re.compile(r"\b\w+(?:ание|ения|ение|ений|ания|ению|енной|анной)\b", re.I)
@@ -99,8 +99,8 @@ def main() -> int:
 
     # two nominalizations in a row
     for m in re.finditer(rf"{NOMINAL.pattern}\s+(?:\w+\s+){{0,1}}{NOMINAL.pattern}", text, re.I):
-        findings.append(("цепочка отглагольных", m.group(0).strip(),
-                         "переписать через глагол", context(text, m.start(), m.end())))
+        findings.append(("nominal chain", m.group(0).strip(),
+                         "rewrite through a verb", context(text, m.start(), m.end())))
 
     # long sentences and participle pile-ups
     long_sentences = 0
@@ -110,13 +110,13 @@ def main() -> int:
         if len(words) > 45:
             long_sentences += 1
             if not args.quiet:
-                findings.append(("длинное предложение", f"{len(words)} слов",
-                                 "разбить", sentence.strip()[:110] + "…"))
+                findings.append(("long sentence", f"{len(words)} words",
+                                 "split it", sentence.strip()[:110] + "…"))
         if len(PARTICIPLE.findall(sentence)) >= 3:
             participle_heavy += 1
             if not args.quiet:
-                findings.append(("причастная каша", "3+ причастия во фразе",
-                                 "оставить одно", sentence.strip()[:110] + "…"))
+                findings.append(("participle pile-up", "3+ participles in one sentence",
+                                 "keep one", sentence.strip()[:110] + "…"))
 
     if not args.quiet:
         by_label: dict[str, list] = {}
@@ -129,12 +129,12 @@ def main() -> int:
                 print(f"  · {hit!r} -> {hint}")
                 print(f"    {ctx}")
             if len(items) > 12:
-                print(f"  … ещё {len(items) - 12}")
+                print(f"  ... {len(items) - 12} more")
 
     words_total = len(re.findall(r"[А-Яа-яЁё]+", text))
-    print(f"\nнаходок: {len(findings)} / русских слов: {words_total} "
-          f"/ длинных предложений: {long_sentences} / причастных завалов: {participle_heavy}")
-    print("линтер ловит механику, не интонацию — вступления каждой страницы всё равно перечитать глазами")
+    print(f"\nfindings: {len(findings)} / Russian words: {words_total} "
+          f"/ long sentences: {long_sentences} / participle pile-ups: {participle_heavy}")
+    print("the linter catches mechanics, not tone: read every page opening by eye as well")
     return 1 if findings else 0
 
 

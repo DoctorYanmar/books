@@ -1,34 +1,35 @@
-# Русский вывод: как писать, чтобы не пахло машиной
+# Russian output: how to write so it does not smell of a machine
 
-Этот файл — обязательное чтение перед тем, как собирать пак на русском.
+Required reading before building a pack in Russian. Explanations are in English; the word lists,
+examples and terminology are in Russian, because that is the data being checked.
 
-## Главное правило: не переводить, а писать
+## The main rule: write in Russian, never translate into it
 
-Пак **не переводится с английского черновика**. Английский черновик — источник кальки:
-порядок слов, цепочки причастий, «является», рубленые фразы английской длины. Если сначала
-написать анализ по-английски, а потом перевести, следы останутся при любой вычитке.
+A pack is **never translated from an English draft**. An English draft is the source of calques:
+English word order, chains of participles, «является», clipped English-length phrases. Write the
+analysis in English first and translate it, and the traces survive any amount of editing.
 
-Поэтому: читаем главы на языке оригинала, думаем, **сразу пишем по-русски**. Промежуточного
-английского текста не существует. Машинный перевод (DeepL, Google, «переведи эту страницу»)
-не используется ни на одном шаге — ни для анализа, ни тем более для цитат.
+So: read the chapters in the original language, think, and **write in Russian directly**. No
+intermediate English text exists. Machine translation (DeepL, Google, "translate this page") is
+used at no step — not for analysis, and least of all for quotes.
 
-## Цитаты: три допустимые политики, выбирается одна и объявляется на странице
+## Quotes: three acceptable policies, pick one and declare it on the page
 
-1. **Русское издание как источник** (лучший вариант). Пользователь кладёт русский файл книги в `library/`.
-   Прогоняем через `extract.py` вторым проходом, цитаты берём **дословно из русского издания**,
-   ссылка — на главу русского текста, на странице указан переводчик и год.
-   Для «Франкенштейна» канон — перевод З. Александровой (1965).
-2. **Двуязычно** (если русского издания нет). Цитата — дословный оригинал, под ней рабочий
-   русский подстрочник с пометкой «подстрочник, не канонический перевод». Ничего не выдаётся
-   за published перевод.
-3. **Русский оригинал** (книга изначально русская) — обычные правила: дословно, без правок.
+1. **A Russian edition as the source** (best). The user puts the Russian file of the book in
+   `library/`. Run `extract.py` a second time over it, take quotes **verbatim from the Russian
+   edition**, cite the chapter of the Russian text, and name the translator and year on the page.
+   For *Frankenstein* the canonical Russian text is З. Александрова's translation (1965).
+2. **Bilingual** (when no Russian edition exists). The quote is the verbatim original with a
+   working Russian gloss under it, marked «подстрочник, не канонический перевод». Nothing is
+   passed off as a published translation.
+3. **Russian original** (the book is Russian to begin with) — the usual rules: verbatim, unedited.
 
-Запрещено: переводить цитату самому и оформлять её как цитату из книги без пометки. Это то же
-самое, что выдумать цитату.
+Forbidden: translating a quote yourself and presenting it as a quote from the book. That is the
+same offence as inventing one.
 
-## Чёрный список
+## Blacklist
 
-Вычистить полностью:
+Remove completely:
 
 - **Канцелярит-связки**: является, представляет собой, осуществлять, производить (в значении
   «делать»), данный/данная в значении «этот», в рамках, в части, в целях, посредством, ввиду того что.
@@ -36,52 +37,56 @@
   необходимо понимать, как мы видим, давайте разберёмся, итак, что же это значит.
 - **Инфостиль-штампы 2020-х**: глубокое погружение, ключевой момент, на самом деле, по сути,
   в конечном счёте, красной нитью, не просто X, а Y; «это не просто книга — это…».
-- **Триплеты-парцелляция**: «Не жалость. Не страх. Ответственность.» Один такой приём на весь
-  документ — уже перебор; ноль — норма.
+- **Триплеты-парцелляция**: «Не жалость. Не страх. Ответственность.» One such device in a whole
+  document is already too many; zero is the norm.
 - **Кальки**: делает смысл (имеет смысл), адресовать проблему, в конце дня, драйвер, челлендж,
-  инсайт (если можно сказать «наблюдение» или «вывод»), нарратив (если речь просто о рассказе).
+  инсайт (when «наблюдение» or «вывод» will do), нарратив (when it is simply a story).
 - **Мусорные усилители**: очень, крайне, поистине, буквально, действительно, просто-напросто.
 
-## Позитивные правила
+## Positive rules
 
-- **Глагол вместо отглагольного существительного.** Не «осуществление отказа от создания
-  подруги», а «он отказался её создать». Цепочка из двух «-ание/-ение» подряд — переписать.
-- **Один причастный оборот на предложение.** Два — уже канцелярская каша; деепричастные обороты
-  в начале фразы («Рассматривая роман…») лучше вообще не начинать.
-- **Действительный залог.** «Существо требует договора», а не «договор требуется существом».
-  Безличные конструкции («считается», «можно сказать») — только там, где субъект правда неизвестен.
-- **Русский ритм, не английский.** Английская проза рубит на короткие предложения; русская
-  спокойно держит период на 25–35 слов. Чередовать длину: если пять фраз подряд одинаковой
-  длины — текст звучит сгенерированным. Больше 45 слов — разбить.
-- **Термины — принятые в русской традиции**: тезис, посылка, довод, аргументация, фабула и сюжет,
-  повествовательная рамка, ненадёжный рассказчик, вставной рассказ, романтическая ирония.
-  Не изобретать: «клейм», «эвиденс», «пиллар». Уровни в паке называются
+- **A verb instead of a verbal noun.** Not «осуществление отказа от создания подруги» but «он
+  отказался её создать». Two «-ание/-ение» nouns in a row: rewrite.
+- **One participial phrase per sentence.** Two is bureaucratic mush; a sentence opening with a
+  gerund («Рассматривая роман…») is better not started at all.
+- **Active voice.** «Существо требует договора», not «договор требуется существом». Impersonal
+  constructions («считается», «можно сказать») only where the subject genuinely is unknown.
+- **Russian rhythm, not English.** English prose chops into short sentences; Russian holds a period
+  of 25–35 words comfortably. Vary the length: five sentences of the same length in a row read as
+  generated. Over 45 words, split.
+- **Use the terms the Russian tradition already has**: тезис, посылка, довод, аргументация, фабула
+  и сюжет, повествовательная рамка, ненадёжный рассказчик, вставной рассказ, романтическая ирония.
+  Do not invent «клейм», «эвиденс», «пиллар». The pack's layers are named
   тезис / опоры / подпорки / свидетельства / фактура (L1–L5).
-- **Имена и реалии — по традиции перевода**, а не транскрипцией на слух: Виктор Франкенштейн,
-  Уолтон, Клерваль, Элизабет, Жюстина, Делейси, «Потерянный рай», «Страдания юного Вертера».
-  Существо называть **существом** или **творением**; «монстр» — только когда так говорит герой.
-- **Пометки провенанса переводятся**: `[book]` → `[книга]`, `[analysis]` → `[разбор]`.
-  Смешивать их по-прежнему нельзя.
+- **Names and cultural references follow the translation tradition**, not transcription by ear:
+  Виктор Франкенштейн, Уолтон, Клерваль, Элизабет, Жюстина, Делейси, «Потерянный рай»,
+  «Страдания юного Вертера». Call the creature **существо** or **творение**; «монстр» only when a
+  character says it.
+- **Provenance tags are translated**: `[book]` → `[книга]`, `[analysis]` → `[разбор]`. Mixing them
+  is still forbidden.
+- **Retelling slot labels are translated too**, per the table in `retelling-standard.md`.
 
-## Типографика
+## Typography
 
-- Кавычки-ёлочки «…», вложенные — „…“. Английские "" в русском тексте не появляются.
-- Тире — длинное (—) с пробелами; дефис только внутри слов. Диапазоны — короткое тире (гл. 10–15).
-- Ставить `ё` последовательно: либо везде, либо нигде. Рекомендуется везде — в учебном тексте
-  это снимает разночтения.
-- Неразрывный пробел перед «гл.», «с.», в инициалах и в «19 в.».
-- Даты и числа по-русски: 1818 год, 78 140 слов (пробел-разделитель разрядов, не запятая).
-- В HTML: `<html lang="ru">` не нужен (обёртку ставит платформа), но `lang="ru"` на `body`
-  или корневом контейнере ставить, а для английских вставок — `<span lang="en">`.
-  Переносы: `hyphens: auto` вместе с `lang` работает по русским правилам.
+- Guillemets «…», nested „…“. English "" never appear in Russian text.
+- The dash is long (—) with spaces; the hyphen only inside words. Ranges take an en dash (гл. 10–15).
+- Use `ё` consistently: everywhere or nowhere. Everywhere is recommended — in a study text it
+  removes ambiguity.
+- Non-breaking space before «гл.», «с.», inside initials and in «19 в.».
+- Dates and numbers the Russian way: 1818 год, 78 140 слов (a space as the thousands separator,
+  not a comma).
+- In HTML: `<html lang="ru">` is unnecessary (the platform supplies the wrapper), but put
+  `lang="ru"` on `body` or the root container, and `<span lang="en">` around English insertions.
+  Hyphenation: `hyphens: auto` follows Russian rules only when `lang` is set.
 
-## Проверка перед публикацией
+## Check before publishing
 
 ```bash
-python .claude/skills/book-distill/scripts/ru_lint.py "library/<book-slug>/page.html"
+python3 .claude/skills/book-distill/scripts/ru_lint.py "library/<book-slug>/page.html"
 ```
 
-Линтер ловит механику: чёрный список, «-ание/-ение» подряд, длинные предложения, английские
-кавычки, дефис вместо тире. Он не ловит главного — интонации. Поэтому после линтера один проход
-глазами по правилу: **если фразу нельзя встретить в живой русской рецензии — переписать**.
-Особенно это касается первых абзацев каждой страницы: генеративный текст выдаёт себя во вступлениях.
+The linter catches mechanics: the blacklist, «-ание/-ение» chains, long sentences, English quotation
+marks, a hyphen where a dash belongs. It does not catch the thing that matters — tone. So after the
+linter, one pass by eye against a single rule: **if the phrase could not appear in a living Russian
+review, rewrite it.** This goes double for the opening paragraphs of every page: generated text
+gives itself away in introductions.
