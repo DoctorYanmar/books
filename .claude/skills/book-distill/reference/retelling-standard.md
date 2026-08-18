@@ -95,7 +95,7 @@ what the reader already holds.
 | First sentence of a chapter | ≤ 25 words, ≤ 2 entities, states a claim | Adler R2; answer-first |
 | Chain openers («Затем», «Дальше», «Далее», «Потом», «Отдельно», «В конце главы», «Также») | 0 | and-then chaining |
 | Causal / contrastive connectives | ≥ 1 per 3 sentences | ИК3; but-therefore rule |
-| Topic chaining | ≥ 20% of sentences open from material already in the previous sentence, or with an explicit connective | Gopen & Swan |
+| Topic chaining | ≥ 20% of prose sentences open from material already in the previous sentence, or with an explicit connective; bullet lists are exempt — parallel items are not a chain | Gopen & Swan |
 | Forward link | present in every chapter | situation model across chapters |
 | `[разбор]` inside a `[книга]` block | 0 | ГОСТ 7.9-95: the referent adds no interpretation |
 
@@ -103,8 +103,8 @@ what the reader already holds.
 
 The research is blunt: reading someone else's summary is the weak form. The benefit lives in
 generating one. So the retelling section ends with **«Проверьте себя»** — 3–5 questions the reader
-answers from memory before moving on, one per микротема, phrased so the answer is a claim and not
-a name. These are not the flashcards from pass 4; they are the gate out of the retelling.
+answers from memory before moving on, phrased so the answer is a claim and not a name — 3–5 at
+`quick` and `standard`, 6–10 at `deep`. These are not the flashcards from pass 4; they are the gate out of the retelling.
 
 ## Checking
 

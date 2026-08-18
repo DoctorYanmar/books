@@ -88,7 +88,10 @@ def share(text, markers):
 
 
 def topic_chain(sents):
-    """Доля предложений, зацепленных за предыдущее: общим словом в начале либо связкой."""
+    """Доля предложений прозы, зацепленных за предыдущее: общим словом в начале либо связкой.
+
+    Считается только по сплошному тексту: пункты перечня стоят рядом как равные,
+    и сцеплять их между собой не нужно."""
     if len(sents) < 2:
         return 1.0
     hits = 0
@@ -173,7 +176,8 @@ def check(raw, depth):
         problems.append("причинных связок %d при %d предложениях — нужно хотя бы %d, иначе цепочка «и потом»"
                         % (ca, len(sents), need))
 
-    chain = topic_chain(sents)
+    prose = re.sub(r"^\s*[-–—].*$", "", raw, flags=re.M)   # списки не цепочка, а перечень
+    chain = topic_chain(sentences(strip_markup(prose)))
     if chain < MIN_TOPIC_CHAIN:
         problems.append("сцепка тем %.0f%% < %.0f%% — каждое предложение о новом"
                         % (chain * 100, MIN_TOPIC_CHAIN * 100))
