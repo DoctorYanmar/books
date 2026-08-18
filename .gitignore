@@ -2,7 +2,14 @@
 __pycache__/
 *.py[cod]
 
-# Original book files are the user's own copies — they stay local, never in the repo.
+# The library holds the user's own copies of the books. Nothing in it is committed.
+/library/*
+!/library/.gitkeep
+
+# Extracted book text is the book itself, in plain form — local only, never pushed.
+*/source/
+
+# Book files anywhere in the tree, whatever they are called.
 *.epub
 *.pdf
 *.fb2

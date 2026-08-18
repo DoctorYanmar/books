@@ -3,6 +3,22 @@
 Every file below is Markdown, written to the book's directory. Keep the headings exactly as
 shown — the interactive page builder and the `quiz`/`ask` modes parse them.
 
+The templates are written with Russian headings in places, because that is what the first packs
+used. **The pack is written in the book's own language by default** (see the skill's *Output
+language* section): translate the headings into the output language and keep the structure
+identical.
+
+Volume per depth — the same templates, three sizes:
+
+| | `quick` | `standard` | `deep` |
+|---|---|---|---|
+| Pack total | 3.5–5k words | 8–11k words | 18–24k words |
+| Retelling | part-level shape | 2–3 sentences per chapter | 5–8 sentences per chapter, with subplots |
+| Scenes | — | 6–8 | 12–16 |
+| Quotes | 8–10 | 20–25 | 40–50 |
+| Cards | ~15 | ~40 | ~80 |
+| Skipped files | `argument-map.md`, `reception.md`, `apply.md`, `links.md` | — | — |
+
 ---
 
 ## notes/NNN-<slug>.md — chapter pass
@@ -54,8 +70,9 @@ Rules that keep it from turning into a blurb:
 
 - **Concrete over abstract.** Not "Winston struggles against the regime" but "Winston buys a diary
   in a junk shop, writes DOWN WITH BIG BROTHER, and understands he is already dead."
-- **Sequential.** Follow the book's own order, part by part, chapter by chapter. Two to five
-  sentences per chapter — enough to see the scene, not a paraphrase of every paragraph.
+- **Sequential.** Follow the book's own order, part by part, chapter by chapter. Two to three
+  sentences per chapter at `standard`, five to eight at `deep`, part-level shape only at `quick` —
+  enough to see the scene, never a paraphrase of every paragraph.
 - **The ending is told.** A study pack is not a bookshop. Withholding the ending makes the analysis
   impossible to follow.
 - **Names, objects, numbers.** The junk shop, the paperweight, room 101, the rats. Concrete nouns
@@ -321,9 +338,17 @@ Card rules — the deck is the deliverable that produces retention, so:
   "title": "...",
   "author": "...",
   "slug": "...",
+  "source_file": "library/The Book.epub",
+  "language": "en",
+  "output_language": "en",
   "depth": "standard",
+  "pack_words": 9400,
   "coverage": {"full_passes": "ch.1-12", "sampled": "ch.13-15", "skipped": []},
   "artifact_url": "https://...",
-  "runs": [{"date": "2026-08-15", "mode": "distill", "cards": 41}]
+  "runs": [{"date": "2026-08-15", "mode": "distill", "depth": "standard", "cards": 41}]
 }
 ```
+
+`language` is the book's own; `output_language` is the pack's. They match unless the run carried a
+`lang:` override — record why when they differ. `pack_words` is the measured total, so the next run
+can see whether the depth budget was actually hit.

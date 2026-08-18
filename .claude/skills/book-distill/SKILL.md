@@ -5,8 +5,9 @@ description: Turn a book file (EPUB/PDF/FB2/TXT) into a layered, interactive stu
 
 # book-distill
 
-Convert a book into an owned, layered knowledge pack the user can absorb in ~30–60 minutes
-instead of reading it, plus a retrieval loop so it actually sticks.
+Convert a book into an owned, layered knowledge pack the user can absorb in half an hour, an
+hour, or two — whichever the run's depth asks for — instead of reading it, plus a retrieval loop
+so it actually sticks.
 
 The design rests on one fact from learning research: **re-reading and highlighting are low-utility;
 retrieval practice and elaborative interrogation are high-utility.** So a summary alone is a
@@ -33,12 +34,19 @@ Two provenance tags, used everywhere and never blurred:
 - `[book]` — the author's own claim, restated.
 - `[analysis]` — your reading: inference, objection, connection, real-world example.
 
-## Directory layout (per book, under the repo root)
+## Directory layout
+
+Book files live in `library/` — the user's own copies, never committed, never edited. The pack for
+each book lives in its own directory at the repo root:
 
 ```
+library/<Book File>.epub   the original, local only (the whole of library/ is gitignored)
+
 <book-slug>/
   book.json          title, author, run log, depth, artifact URL, status
-  source/            manifest.json, chapters/NNN-*.md, full.txt   (generated, do not edit)
+  source/            manifest.json, chapters/NNN-*.md, full.txt   (generated, do not edit,
+                     gitignored — it is the book's own text, so it stays local like the file it
+                     came from)
   notes/NNN-*.md     per-chapter dense notes + quotes            (pass 2)
   spine.md           L1 + L2 ladder, 10-minute read              (pass 3)
   argument-map.md    claim -> evidence -> strength -> objection   (pass 3)
@@ -56,11 +64,14 @@ Two provenance tags, used everywhere and never blurred:
 ### Pass 0 — Ingest
 
 ```bash
-python .claude/skills/book-distill/scripts/extract.py "<book file>" --out "<book-slug>/source"
+python .claude/skills/book-distill/scripts/extract.py "library/<book file>" --out "<book-slug>/source"
 ```
 
-Read `source/manifest.json`. Report to the user: title, author, chapter count, total words,
-estimated tokens, and the depth you propose. If `est_total_tokens` > 400k, say so and default
+If the user points at a book sitting somewhere else — the repo root, Downloads, an argument to
+`distill` — move it into `library/` first, then extract. Books belong in one place.
+
+Read `source/manifest.json`. Report to the user: title, author, language, chapter count, total
+words, estimated tokens, and the depth and output language you propose. If `est_total_tokens` > 400k, say so and default
 to `standard` depth with sampling (see Depth).
 
 PDF caveat: chapter splitting is regex-based on flat text and can be wrong. Check the chapter
@@ -167,23 +178,37 @@ syntopical layer — it is the main thing single-book tools cannot do.
 
 ## Output language
 
-Default output language for this library is **Russian**. English (or any other language) only when
-the user asks for it on a specific run.
+**The pack is written in the language of the book.** That is the default: a Russian edition of
+*1984* produces a Russian pack, an English edition of *Antifragile* produces an English one. The
+user overrides it per run when they want something else.
 
-The source book keeps its own language — a book in English is read in English and the pack is
-**written** in Russian. Never produce an English draft and translate it: the calque survives every
-edit pass. Load `reference/ru-style.md` before writing a single Russian sentence — it carries the
-banned-construction list, the quote policy, terminology and typography.
+How the language is decided, in this order:
 
-Quotes are the one thing that cannot be written, only sourced. Pick a policy per book, state it on
-the page:
+1. An explicit flag on the request — `lang:en`, `lang:ru`, "на русском", "in English". Always wins.
+2. `language` in `source/manifest.json` — EPUB and FB2 carry it in their metadata.
+3. When that is missing or obviously wrong (PDF and TXT usually have no metadata), judge from the
+   text of `source/full.txt`.
 
-1. Russian edition available → run `extract.py` on it too and pull quotes verbatim from it, naming
-   translator and year.
-2. No Russian edition → quote the original verbatim, add a working gloss marked as a gloss.
-3. Book is Russian originally → normal verbatim rules.
+Say which language you picked, and why, in the ingest report. Record it in `book.json` as
+`output_language`, next to the book's own `language`.
 
-Before publishing a Russian page:
+The book keeps its own language regardless of the pack's: a book in English is read in English even
+when the pack is written in Russian. Never write a draft in one language and translate it — the
+calque survives every edit pass. Write in the target language from the first sentence.
+
+Quotes are the one thing that cannot be written, only sourced. Pick a policy per book and state it
+on the page:
+
+1. An edition in the output language exists → run `extract.py` on it too and pull quotes verbatim
+   from it, naming translator and year.
+2. No such edition → quote the original verbatim and add a working gloss, marked as a gloss.
+3. Book is already in the output language → normal verbatim rules.
+
+### Russian output
+
+Load `reference/ru-style.md` before writing a single Russian sentence — it carries the
+banned-construction list, the quote policy, terminology and typography. Before publishing a Russian
+page:
 
 ```bash
 python .claude/skills/book-distill/scripts/ru_lint.py "<book-slug>/page.html"
@@ -192,19 +217,69 @@ python .claude/skills/book-distill/scripts/ru_lint.py "<book-slug>/page.html"
 Fix every finding, then reread the opening paragraph of each page by hand — the linter catches
 mechanics, not intonation, and generated prose gives itself away in openings.
 
+### Other languages
+
+Same discipline, no linter. The templates in `reference/layers.md` show Russian headings in places;
+translate the headings into the output language and keep the structure identical — the page builder
+and the `quiz`/`ask` modes parse the structure, not the words. Reread the openings by hand there too.
+
 ## Depth
 
-| Depth | Chapter passes | Output | Use when |
-|-------|----------------|--------|----------|
-| `quick` | intro/conclusion + skim of pillar chapters | spine, quotes, 15 cards | triage: is this book worth the pack? |
-| `standard` (default) | every chapter file | all files, ~40 cards | normal run |
-| `deep` | every chapter + per-pillar re-read pass | all files + expanded critique, ~80 cards | book the user will act on |
+Depth is a **study-time budget for the reader**, not an effort dial for the run. The numbers below
+are calibrated on an ordinary 300–400 page book — roughly 90–120k words, 25–40 chapters. For a book
+far outside that range, scale the word budgets with the source length and say so in `book.json`.
 
-For books over ~400k estimated tokens, `standard` may sample: full passes on chapters carrying
-L2 pillars, one-paragraph passes on the rest. **Say in `book.json` and to the user exactly which
-chapters were sampled** — never let a partial pass look complete.
+| Depth | Reader spends | Pack size | Cards | Chapter passes |
+|-------|---------------|-----------|-------|----------------|
+| `quick` | ~30 min | 3.5–5k words | ~15 | intro, conclusion, and the chapters carrying pillars |
+| `standard` (default) | ~1 hour | 8–11k words | ~40 | every chapter file, one pass each |
+| `deep` | ~2 hours | 18–24k words | ~80 | every chapter, plus a re-read pass per pillar |
+
+The word budgets come from the time: ~45 minutes of reading plus ~15 of retrieval for `standard`, at
+roughly 180 words per minute on dense study prose. Count the whole pack — the page is what the
+reader actually spends the hour on.
+
+**quick** — triage. Retelling covers the overview, the cast, and the shape of the plot at part
+level. Spine with thesis and pillars. 8–10 quotes. No argument map, no reception, no `apply.md`,
+no `links.md`. It answers one question: is this book worth the full pack?
+
+**standard** — the normal run. Every layer in the pipeline. Retelling covers every chapter in 2–3
+sentences, 6–8 scenes in close-up, 20–25 quotes. Critique and reception both present, both compact.
+
+**deep** — for a book the user will act on. Everything `standard` has at roughly double the volume,
+and the extra volume goes into *content*, not commentary:
+
+- retelling at 5–8 sentences per chapter, carrying the subplots, minor characters and second-order
+  detail that `standard` drops;
+- 12–16 scenes in close-up, each with a verbatim quote;
+- 40–50 quotes, including the ones that only work in context;
+- a second pass per pillar: re-read the chapters it rests on, follow the evidence chain to its
+  source, note what the author never says;
+- expanded critique — every pillar gets its strongest named objection, not only the weak ones;
+- reception researched wider: the dissenters, the writers who answered back, the afterlife;
+- `apply.md` with concrete experiments and `links.md` against every other book in the library.
+
+The failure mode of `deep` is padding: longer restatement of the same claim, more adjectives, more
+throat-clearing about method. A deep pack is longer because it carries **more of the book** — more
+scenes, more names, more evidence, more objections. If a deep section says nothing `standard` did
+not, cut it.
+
+For books over ~400k estimated tokens, `standard` may sample: full passes on chapters carrying L2
+pillars, one-paragraph passes on the rest. **Say in `book.json` and to the user exactly which
+chapters were sampled** — never let a partial pass look complete. `deep` does not sample: if the
+book is too large for full passes, say so and run `standard`.
 
 ## Modes
+
+Invocation, with both modifiers optional and order-free:
+
+```
+distill <book> [quick|standard|deep] [lang:<code>]
+```
+
+`quick`/`standard`/`deep` set the depth (default `standard`); `lang:` overrides the output
+language (default: the book's own, see **Output language**). Plain requests carry the same
+meaning — "по-английски", "in Russian", "the deep one" — read them as the flags they are.
 
 The user can ask for a single stage instead of the whole pipeline:
 
@@ -227,3 +302,5 @@ The user can ask for a single stage instead of the whole pipeline:
 4. If the book is bad — thin, derivative, evidence-free — say so in `critique.md` and cut the
    pack short rather than inflating it.
 5. State coverage honestly in `book.json`: which chapters got full passes, which were sampled.
+6. Book files live in `library/` and never leave it. `library/` and every `source/` directory are
+   gitignored — the book's own text stays on the user's machine and is never committed or pushed.

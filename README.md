@@ -1,12 +1,15 @@
 # books — learn a book without reading it
 
-Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into this folder and ask Claude Code:
+Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into `library/` and ask Claude Code:
 
 ```
 distill Antifragile.epub
 ```
 
 You get a directory of plain Markdown you own, plus an interactive page you can open in a browser.
+
+`library/` and every `source/` directory are gitignored: the books themselves, and the plain text
+extracted from them, stay on your machine. Only the packs are ever committed.
 
 ## What comes out
 
@@ -36,12 +39,36 @@ The other half of the value is the part summary apps skip: an honest critique, a
 
 | Ask for | What happens |
 |---------|--------------|
-| `distill <file>` | Full pipeline (`quick` / `standard` / `deep` depth) |
+| `distill <file> [depth] [lang:xx]` | Full pipeline — see **Depth** and **Language** below |
 | `quiz <book>` | Interactive retrieval session in chat; misses are logged and come first next time |
 | `ask <book> <question>` | Answers grounded in the notes, cited by chapter |
 | `teach <book> <pillar>` | You explain it; Claude finds where your explanation breaks |
 | `sync` | Rebuild cross-book connections across the whole library |
 | `page <book>` | Rebuild and republish the interactive page |
+
+## Depth
+
+Depth is how long *you* spend with the finished pack, on an ordinary 300–400 page book:
+
+| Depth | You spend | Pack | Cards | What it reads |
+|-------|-----------|------|-------|---------------|
+| `quick` | ~30 min | 3.5–5k words | ~15 | intro, conclusion, pillar chapters |
+| `standard` (default) | ~1 hour | 8–11k words | ~40 | every chapter, one pass |
+| `deep` | ~2 hours | 18–24k words | ~80 | every chapter, plus a re-read per pillar |
+
+`deep` is longer because it carries *more of the book* — chapter-by-chapter retelling at full
+density, 12–16 scenes in close-up, 40–50 quotes, every pillar met with its strongest named
+objection — not because it says the same things at greater length.
+
+## Language
+
+The pack is written **in the language of the book** by default. Override per run:
+
+```
+distill Antifragile.epub deep lang:ru
+```
+
+Both the book's own language and the pack's are recorded in `book.json`.
 
 ## Requirements
 
@@ -51,6 +78,6 @@ The other half of the value is the part summary apps skip: an honest critique, a
 ## Manual script use
 
 ```bash
-python .claude/skills/book-distill/scripts/extract.py "Book.epub" --out book-slug/source
+python .claude/skills/book-distill/scripts/extract.py "library/Book.epub" --out book-slug/source
 python .claude/skills/book-distill/scripts/make_cards.py book-slug/cards.md
 ```
