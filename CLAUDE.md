@@ -1,20 +1,25 @@
 # books
 
 A personal book-distillation library. Drop a book file in `library/`; the `book-distill` skill
-turns it into a layered study pack plus an interactive page.
+turns it into a layered study pack plus an interactive page, all of it in the book's own directory.
 
 ## Layout
 
-```
-library/              the book files themselves — gitignored, never committed
+Git holds the skill and these docs. **Everything about every book is local only** — `library/` is
+gitignored in full, because the books are the user's copies and the packs quote them at length.
 
-<book-slug>/          one directory per book (see .claude/skills/book-distill/SKILL.md)
-  source/             extracted chapters — generated, never hand-edit, gitignored
-  notes/              per-chapter passes
+```
+.claude/skills/book-distill/   the pipeline (see its SKILL.md)
+CLAUDE.md  README.md           committed
+
+library/<book-slug>/           one directory per book — gitignored, never committed
+  <Book File>.epub             the user's own copy
+  source/                      extracted chapters — generated, never hand-edit
+  notes/                       per-chapter passes
   spine.md  argument-map.md  quotes.md  critique.md
   cards.md  anki.tsv  drills.md  apply.md  links.md
-  book.json           run log, coverage, artifact URL
-  page.html           the interactive page (republish to the same path to keep the URL)
+  book.json                    run log, coverage, artifact URL
+  page.html                    the interactive page (republish to the same path to keep the URL)
 ```
 
 ## Conventions
@@ -32,16 +37,17 @@ library/              the book files themselves — gitignored, never committed
 
 - Invoke the `book-distill` skill for anything involving a book in this folder: distilling,
   quizzing, asking questions about one, or connecting several.
-- Book slugs are lowercase-hyphenated short titles (`antifragile`, not `antifragile-things-that-gain`).
+- Book slugs are lowercase-hyphenated short titles: `library/antifragile/`, not
+  `library/antifragile-things-that-gain/`.
 - `[book]` = the author's claim. `[analysis]` = ours. Never merge the two.
 - Quotes are copy-pasted from `source/chapters/`, never regenerated from memory. No verbatim
   match means the quote is dropped.
 - Never overstate coverage: if chapters were sampled rather than fully read, `book.json` and
   `spine.md` say which.
-- Original book files live in `library/` and are **not committed** — they are the user's copies.
-  Neither is `source/`: the extracted plain text is the book itself. `.gitignore` enforces both
-  (`/library/*`, `*/source/`, plus the book extensions anywhere in the tree). The packs are what
-  gets pushed.
+- Nothing under `library/` is committed — not the book file, not `source/`, not the pack, not the
+  page. `.gitignore` enforces it (`/library/*`, plus the book extensions anywhere in the tree, in
+  case a file is dropped outside by mistake). Never work around it to "back up" a pack; the packs
+  are the user's private study material, and the repo is the tooling.
 
 ## Machine notes (macOS, moved here 2026-08-17)
 

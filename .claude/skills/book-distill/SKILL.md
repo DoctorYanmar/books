@@ -36,17 +36,16 @@ Two provenance tags, used everywhere and never blurred:
 
 ## Directory layout
 
-Book files live in `library/` — the user's own copies, never committed, never edited. The pack for
-each book lives in its own directory at the repo root:
+Everything about a book lives in one directory: `library/<book-slug>/`. The book file, the
+extracted text, the pack, the page. **The whole of `library/` is gitignored** — the books are the
+user's own copies and the packs quote them at length, so none of it is ever committed or pushed.
+Only the skill and the repo docs live in git.
 
 ```
-library/<Book File>.epub   the original, local only (the whole of library/ is gitignored)
-
-<book-slug>/
-  book.json          title, author, run log, depth, artifact URL, status
-  source/            manifest.json, chapters/NNN-*.md, full.txt   (generated, do not edit,
-                     gitignored — it is the book's own text, so it stays local like the file it
-                     came from)
+library/<book-slug>/
+  <Book File>.epub   the original, exactly as the user has it — never edited, never renamed
+  book.json          title, author, language, run log, depth, artifact URL, status
+  source/            manifest.json, chapters/NNN-*.md, full.txt   (generated, do not edit)
   notes/NNN-*.md     per-chapter dense notes + quotes            (pass 2)
   spine.md           L1 + L2 ladder, 10-minute read              (pass 3)
   argument-map.md    claim -> evidence -> strength -> objection   (pass 3)
@@ -59,16 +58,21 @@ library/<Book File>.epub   the original, local only (the whole of library/ is gi
   links.md           cross-book connections                       (pass 6)
 ```
 
+Slugs are lowercase-hyphenated short titles: `library/antifragile/`, not
+`library/antifragile-things-that-gain-from-disorder/`.
+
 ## Pipeline
 
 ### Pass 0 — Ingest
 
 ```bash
-python .claude/skills/book-distill/scripts/extract.py "library/<book file>" --out "<book-slug>/source"
+python .claude/skills/book-distill/scripts/extract.py "library/<book-slug>/<book file>"
 ```
 
-If the user points at a book sitting somewhere else — the repo root, Downloads, an argument to
-`distill` — move it into `library/` first, then extract. Books belong in one place.
+The default output is `source/` beside the book file, which is where it belongs — no `--out`
+needed. If the user points at a book sitting somewhere else (the repo root, Downloads, an argument
+to `distill`), create `library/<book-slug>/`, move the file in, and extract from there. One book,
+one directory, everything in it.
 
 Read `source/manifest.json`. Report to the user: title, author, language, chapter count, total
 words, estimated tokens, and the depth and output language you propose. If `est_total_tokens` > 400k, say so and default
@@ -156,7 +160,7 @@ against which pillar.
 Write `cards.md` and `drills.md` per `reference/layers.md` card rules, then:
 
 ```bash
-python .claude/skills/book-distill/scripts/make_cards.py "<book-slug>/cards.md"
+python .claude/skills/book-distill/scripts/make_cards.py "library/<book-slug>/cards.md"
 ```
 
 Card count by depth: quick ~15, standard ~40, deep ~80. Cards test *understanding and transfer*,
@@ -211,7 +215,7 @@ banned-construction list, the quote policy, terminology and typography. Before p
 page:
 
 ```bash
-python .claude/skills/book-distill/scripts/ru_lint.py "<book-slug>/page.html"
+python .claude/skills/book-distill/scripts/ru_lint.py "library/<book-slug>/page.html"
 ```
 
 Fix every finding, then reread the opening paragraph of each page by hand — the linter catches
@@ -302,5 +306,6 @@ The user can ask for a single stage instead of the whole pipeline:
 4. If the book is bad — thin, derivative, evidence-free — say so in `critique.md` and cut the
    pack short rather than inflating it.
 5. State coverage honestly in `book.json`: which chapters got full passes, which were sampled.
-6. Book files live in `library/` and never leave it. `library/` and every `source/` directory are
-   gitignored — the book's own text stays on the user's machine and is never committed or pushed.
+6. A book and everything made from it live in `library/<book-slug>/`, and `library/` is gitignored
+   in full. Nothing about any book — file, extracted text, notes, page — is ever committed or
+   pushed. Never work around the ignore rules to "back up" a pack.

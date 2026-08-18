@@ -11,7 +11,9 @@ Stdlib only (no pip install needed). Supported inputs:
 Usage:
     python extract.py "The Book.epub" [--out DIR] [--target-words 3500]
 
-Output layout (DIR defaults to <book-slug>/source next to the input file):
+Output layout. DIR defaults to `source/` beside the book file, which is where it belongs
+under the library layout (`library/<book-slug>/<book file>`). A book sitting loose in
+`library/` instead gets a directory of its own: `library/<book-slug>/source`.
 
     <out>/manifest.json          metadata + chapter table (words, est. tokens)
     <out>/chapters/001-slug.md   one file per chapter (or per split block)
@@ -311,7 +313,7 @@ def split_long(text: str, target_words: int) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("book", help="path to .epub/.pdf/.fb2/.txt/.md")
-    ap.add_argument("--out", help="output directory (default: <slug>/source beside the book)")
+    ap.add_argument("--out", help="output directory (default: source/ beside the book)")
     ap.add_argument("--target-words", type=int, default=3500,
                     help="max words per chapter file before splitting (default 3500)")
     args = ap.parse_args()
@@ -334,7 +336,14 @@ def main() -> int:
 
     meta, chapters = reader(src)
     title = meta.get("title") or src.stem
-    out_dir = Path(args.out).resolve() if args.out else src.parent / slugify(title) / "source"
+    if args.out:
+        out_dir = Path(args.out).resolve()
+    elif src.parent.name == "library":
+        # dropped loose into the library — give the book a directory of its own
+        out_dir = src.parent / slugify(title) / "source"
+    else:
+        # already in library/<book-slug>/ — the pack goes next to the file
+        out_dir = src.parent / "source"
     (out_dir / "chapters").mkdir(parents=True, exist_ok=True)
 
     entries, total_words = [], 0

@@ -78,7 +78,7 @@
 ## Проверка перед публикацией
 
 ```bash
-python .claude/skills/book-distill/scripts/ru_lint.py "<book-slug>/page.html"
+python .claude/skills/book-distill/scripts/ru_lint.py "library/<book-slug>/page.html"
 ```
 
 Линтер ловит механику: чёрный список, «-ание/-ение» подряд, длинные предложения, английские

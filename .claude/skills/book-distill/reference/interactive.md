@@ -4,7 +4,7 @@ One self-contained HTML file per book, published with the Artifact tool. Load th
 `artifact-design` skill first — this file specifies *behavior and information architecture*, not
 visual design.
 
-Write the file to `<book-slug>/page.html`, publish, and store the returned URL in `book.json`.
+Write the file to `library/<book-slug>/page.html`, publish, and store the returned URL in `book.json`.
 Republishing the same file path updates the same URL — always reuse the path so the link is stable.
 
 ## The one job of this page

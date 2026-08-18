@@ -6,10 +6,19 @@ Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into `library/` and as
 distill Antifragile.epub
 ```
 
-You get a directory of plain Markdown you own, plus an interactive page you can open in a browser.
+You get a directory of plain Markdown you own, plus an interactive page you can open in a browser —
+all of it inside the book's own folder:
 
-`library/` and every `source/` directory are gitignored: the books themselves, and the plain text
-extracted from them, stay on your machine. Only the packs are ever committed.
+```
+library/antifragile/
+  Antifragile.epub      your copy
+  source/               the extracted text
+  notes/  spine.md  quotes.md  critique.md  cards.md  ...
+  book.json  page.html
+```
+
+**`library/` is gitignored in full.** Books and packs stay on your machine; the repo carries the
+pipeline and nothing else.
 
 ## What comes out
 
@@ -78,6 +87,6 @@ Both the book's own language and the pack's are recorded in `book.json`.
 ## Manual script use
 
 ```bash
-python .claude/skills/book-distill/scripts/extract.py "library/Book.epub" --out book-slug/source
-python .claude/skills/book-distill/scripts/make_cards.py book-slug/cards.md
+python .claude/skills/book-distill/scripts/extract.py "library/book-slug/Book.epub"
+python .claude/skills/book-distill/scripts/make_cards.py library/book-slug/cards.md
 ```

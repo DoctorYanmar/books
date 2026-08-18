@@ -1,6 +1,7 @@
 # Output templates
 
-Every file below is Markdown, written to the book's directory. Keep the headings exactly as
+Every file below is Markdown, written to the book's directory, `library/<book-slug>/`. Paths in
+`book.json` are relative to that directory. Keep the headings exactly as
 shown — the interactive page builder and the `quiz`/`ask` modes parse them.
 
 The templates are written with Russian headings in places, because that is what the first packs
@@ -338,7 +339,7 @@ Card rules — the deck is the deliverable that produces retention, so:
   "title": "...",
   "author": "...",
   "slug": "...",
-  "source_file": "library/The Book.epub",
+  "source_file": "The Book.epub",
   "language": "en",
   "output_language": "en",
   "depth": "standard",

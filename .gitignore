@@ -2,14 +2,13 @@
 __pycache__/
 *.py[cod]
 
-# The library holds the user's own copies of the books. Nothing in it is committed.
+# The library is local. Every book lives in library/<slug>/ — the file itself, the extracted
+# text, the whole pack, the page. None of it is committed: the packs quote copyrighted books
+# at length and the source/ directories are the books in plain form.
 /library/*
 !/library/.gitkeep
 
-# Extracted book text is the book itself, in plain form — local only, never pushed.
-*/source/
-
-# Book files anywhere in the tree, whatever they are called.
+# Book files anywhere in the tree, in case one is dropped outside the library by mistake.
 *.epub
 *.pdf
 *.fb2
