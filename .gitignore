@@ -7,6 +7,10 @@ __pycache__/
 # at length and the source/ directories are the books in plain form.
 /library/*
 !/library/.gitkeep
+# The drop zone: books land here, the pipeline moves them into library/<slug>/ and the
+# directory goes back to empty. Never committed, same reason as library/.
+/input/*
+!/input/.gitkeep
 
 # Book files anywhere in the tree, in case one is dropped outside the library by mistake.
 *.epub

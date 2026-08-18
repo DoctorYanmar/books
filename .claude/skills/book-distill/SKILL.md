@@ -36,12 +36,15 @@ Two provenance tags, used everywhere and never blurred:
 
 ## Directory layout
 
-Everything about a book lives in one directory: `library/<book-slug>/`. The book file, the
-extracted text, the pack, the page. **The whole of `library/` is gitignored** — the books are the
-user's own copies and the packs quote them at length, so none of it is ever committed or pushed.
-Only the skill and the repo docs live in git.
+Books arrive in `input/` — that is the drop zone and the only place the user has to think about.
+Everything about a book, once ingested, lives in one directory: `library/<book-slug>/`. The book
+file, the extracted text, the pack, the page. **`input/` and `library/` are both gitignored in
+full** — the books are the user's own copies and the packs quote them at length, so none of it is
+ever committed or pushed. Only the skill and the repo docs live in git.
 
 ```
+input/                 the drop zone: a new book file waits here, and only until pass 0 runs
+
 library/<book-slug>/
   <Book File>.epub   the original, exactly as the user has it — never edited, never renamed
   book.json          title, author, language, run log, depth, artifact URL, status
@@ -61,18 +64,44 @@ library/<book-slug>/
 Slugs are lowercase-hyphenated short titles: `library/antifragile/`, not
 `library/antifragile-things-that-gain-from-disorder/`.
 
+The interactive page is built from a shared template, not written from scratch:
+
+```
+.claude/skills/book-distill/reference/
+  page-template.html   the app shell every page uses: same views, same components, same JS
+  interactive.md       what each view holds, how the palette is derived, how to verify
+```
+
 ## Pipeline
 
 ### Pass 0 — Ingest
+
+Ingest is what turns a loose file into a library entry. It always runs first, even when the user
+names the book, and it always ends with the file inside `library/<book-slug>/`.
+
+1. **Find the book.** With no filename in the request, list `input/` — that is where books are
+   dropped. One file there is the book; several means asking which, unless the user said "all of
+   them". A path in the request wins over `input/`; a book found loose in the repo root or handed
+   over from anywhere else on disk is handled exactly the same way from step 2 on.
+2. **Derive the slug.** Read the title and author out of the file's metadata rather than its
+   filename — download names are mangled and often truncated mid-word. The slug is a short,
+   lowercase-hyphenated title, transliterated into ASCII for non-Latin scripts
+   (`злые-самаритяне` → `zlye-samaritiane`), and it is the short title only:
+   `library/antifragile/`, not `library/antifragile-things-that-gain/`. Tell the user the slug you
+   picked. If `library/<slug>/` already exists and holds a pack, stop and ask — never overwrite an
+   existing pack, and never silently distil the same book twice under two slugs.
+3. **Move, do not copy.** `mkdir -p library/<book-slug>/` and `mv` the file in, keeping its
+   original filename intact — the user has one copy of the book and it stays one copy. `input/`
+   is left empty (bar `.gitkeep`) so the next drop is unambiguous. Never extract or distil a book
+   in place in `input/`.
+4. **Extract.**
 
 ```bash
 python .claude/skills/book-distill/scripts/extract.py "library/<book-slug>/<book file>"
 ```
 
 The default output is `source/` beside the book file, which is where it belongs — no `--out`
-needed. If the user points at a book sitting somewhere else (the repo root, Downloads, an argument
-to `distill`), create `library/<book-slug>/`, move the file in, and extract from there. One book,
-one directory, everything in it.
+needed. One book, one directory, everything in it.
 
 Read `source/manifest.json`. Report to the user: title, author, language, chapter count, total
 words, estimated tokens, and the depth and output language you propose. If `est_total_tokens` > 400k, say so and default
@@ -168,11 +197,26 @@ never trivia ("what year was the study?" is a bad card).
 
 ### Pass 5 — Interactive page
 
-Build a single self-contained HTML page and publish it with the Artifact tool.
-**Load the `artifact-design` skill before writing it.** Required behavior is specified in
-`reference/interactive.md`: layered progressive disclosure (thesis → pillars → support →
-evidence), quote cards, flip-cards, a self-graded quiz, and the critique panel.
-Record the returned URL in `book.json`.
+**The page has one structure, shared by every book in the library.** It lives in
+`reference/page-template.html`: an app shell with a numbered rail and thirteen views in a fixed
+order — about, world, plot, scenes, spine, map, quotes, critique, reception, cards, drills, apply,
+method. Fill its `{{PLACEHOLDER}}` slots; never invent a section order, rename an id or drop a
+view. Depth changes how densely the views are filled, not how many there are.
+
+**Two skills are mandatory before writing it**, in this order:
+
+1. `ui-ux-pro-max` — the design and accessibility authority for this pass. Its pre-delivery
+   checklist (contrast in both themes, focus states, touch targets, no horizontal scroll at 375px,
+   reduced motion) is the last gate before publishing.
+2. `artifact-design` — for the publishing mechanics of the Artifact itself.
+
+**The palette is the one thing designed per book, and it is taken from the book's cover** — pull
+the cover image out of the file, read its dominant colours, map them onto `--accent` and `--steel`,
+and bias the neutrals a few points toward the accent hue. Two books in the library must not share
+an accent hue.
+
+`reference/interactive.md` carries the slot list, the view-to-file mapping, the palette procedure
+and the verification steps. Record the returned URL in `book.json`.
 
 ### Pass 6 — Cross-book links (only when ≥2 books exist)
 
@@ -278,11 +322,12 @@ book is too large for full passes, say so and run `standard`.
 Invocation, with both modifiers optional and order-free:
 
 ```
-distill <book> [quick|standard|deep] [lang:<code>]
+distill [<book>] [quick|standard|deep] [lang:<code>]
 ```
 
-`quick`/`standard`/`deep` set the depth (default `standard`); `lang:` overrides the output
-language (default: the book's own, see **Output language**). Plain requests carry the same
+The book argument is optional: with none, the book is whatever is sitting in `input/` (see
+**Pass 0**). `quick`/`standard`/`deep` set the depth (default `standard`); `lang:` overrides the
+output language (default: the book's own, see **Output language**). Plain requests carry the same
 meaning — "по-английски", "in Russian", "the deep one" — read them as the flags they are.
 
 The user can ask for a single stage instead of the whole pipeline:
@@ -306,6 +351,12 @@ The user can ask for a single stage instead of the whole pipeline:
 4. If the book is bad — thin, derivative, evidence-free — say so in `critique.md` and cut the
    pack short rather than inflating it.
 5. State coverage honestly in `book.json`: which chapters got full passes, which were sampled.
-6. A book and everything made from it live in `library/<book-slug>/`, and `library/` is gitignored
-   in full. Nothing about any book — file, extracted text, notes, page — is ever committed or
-   pushed. Never work around the ignore rules to "back up" a pack.
+6. A book and everything made from it live in `library/<book-slug>/`, and `input/` and `library/`
+   are both gitignored in full. Nothing about any book — file, extracted text, notes, page — is
+   ever committed or pushed. Never work around the ignore rules to "back up" a pack.
+7. `input/` holds books that have not been ingested yet, nothing else. Pass 0 empties it by moving
+   the file, never by copying or deleting it.
+8. Every page in the library has the same thirteen views in the same order. Per book only the
+   content, the depth and the palette change — and the palette comes from that book's cover.
+9. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
+   after the page turns out wrong.

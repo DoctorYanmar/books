@@ -1,67 +1,121 @@
 # Interactive page spec (Pass 5)
 
-One self-contained HTML file per book, published with the Artifact tool. Load the
-`artifact-design` skill first — this file specifies *behavior and information architecture*, not
-visual design.
+One self-contained HTML file per book, published with the Artifact tool. Write it to
+`library/<book-slug>/page.html`, publish, store the returned URL in `book.json`. Republishing the
+same path keeps the same URL — always reuse the path so links stay stable.
 
-Write the file to `library/<book-slug>/page.html`, publish, and store the returned URL in `book.json`.
-Republishing the same file path updates the same URL — always reuse the path so the link is stable.
+## Two hard rules
 
-## The one job of this page
+**1. The structure is the same for every book.** It is not designed per book and not improvised.
+It lives in `reference/page-template.html`: the same shell, the same thirteen views in the same
+order, the same component classes, the same JavaScript. What changes from book to book is the
+content, the depth, and the palette — nothing else. A page that invents its own section order is
+a defect, however good it looks.
 
-Let the user go from "knows nothing" to "holds the argument" in a single scroll, at a depth they
-choose per claim — and then be tested. It is a study instrument, not a summary poster.
+**2. The palette comes from the book's cover.** Every book gets its own colour identity, taken
+from the cover of the edition in `library/<book-slug>/`, so two packs never look alike and each
+looks like its book. Nothing else in the design is per-book.
 
-## Required sections, in order
+**Load the `ui-ux-pro-max` skill before writing the page.** It is mandatory for this pass — it
+carries the accessibility, contrast, touch-target and typography checks this page is held to, and
+its pre-delivery checklist is the last gate before publishing. `artifact-design` stays useful for
+the publishing mechanics; it does not replace the structure below.
 
-1. **Header** — title, author, year, one-line thesis, and honest stats: chapters covered, words
-   in the original, estimated read time of the page, coverage caveat if sampled.
+## The template
 
-2. **Retelling — the first pages, before any analysis.** Overview, cast, world, the sequential
-   plot retelling, key scenes, timeline. The plot page gets its own navigation entry and is
-   readable start to finish on its own. A reader who lands on the page and reads only this section
-   must come away able to describe the book. Everything here is `[book]`; no interpretation.
+```bash
+cp .claude/skills/book-distill/reference/page-template.html /tmp/page-build.html
+```
 
-3. **The ladder (progressive disclosure)** — the core interaction. Each pillar renders collapsed:
-   claim + evidence-strength chip (`strong` / `mixed` / `anecdotal`). Expanding reveals the L3
-   mechanism bullets; expanding again reveals L4 evidence and the load-bearing quote. Three levels,
-   collapsed by default, keyboard-operable. `[analysis]` content is visually distinct from
-   `[book]` content everywhere it appears — one consistent marker, explained once in a legend.
+The file is plain HTML with `{{PLACEHOLDER}}` slots. Fill every one — a leftover `{{...}}` in the
+published page is a bug. The slots fall into five groups:
 
-4. **Argument map** — the `argument-map.md` table rendered as a dependency view: pillars as nodes,
-   support as children, with the weak links marked. An inline SVG tree is enough; if the map has
-   more than ~15 nodes, fall back to the table with strength chips. Must scroll inside its own
-   container, never widen the page.
+| Group | Slots | What goes in |
+|---|---|---|
+| Палитра | `PALETTE_LIGHT`, `PALETTE_DARK_MEDIA`, `PALETTE_DARK_ATTR` | token values taken from the cover (see below) |
+| Шапка | `TITLE`, `BRAND_*`, `SIDE_FOOT`, `KICKER`, `H1`, `H1_SUB`, `THESIS`, `METALINE` | book identity and honest stats |
+| Подписи | `NAV_*`, `GROUP_*`, `H2_*`, `LEDE_*`, and the UI strings in the cards view | translated into the pack's output language |
+| Разделы | `VIEW_*` | the content of each view, built from the Markdown files |
+| Данные | `QUOTES_JSON`, `CARDS_JSON`, `SCHEDULE_JSON`, `POSITIONS_JSON`, `STORE_KEY`, `QUOTE_ATTRIB` | generated from `quotes.md` and `anki.tsv`, never retyped |
 
-5. **Quote cards** — the three tiers from `quotes.md` (load-bearing / sharp / suspect), each with
-   its chapter reference and a copy button. The "suspect" tier keeps its `[analysis]` note visible.
+Section ids, their order, the class names and the JavaScript are fixed. Translate the labels for a
+non-Russian pack; never rename an id, drop a view, or add one.
 
-6. **Reception** — what the documented critics said: contemporary reviews, the major objections, the
-   writers who answered back, the book's afterlife, and a source list. Every entry names a critic,
-   a publication and a year; nothing here may be written from memory.
+## The thirteen views
 
-7. **Critique panel** — collapsible, one entry per section of `critique.md`, verdict pinned at
-   the top and always visible.
+Grouped in the rail as **Книга → Разбор → Работа** (translate the group names, keep the grouping).
 
-8. **Retrieval** — two modes over the deck in `cards.md`:
-   - *Flip*: question shown, answer hidden, self-grade got-it / missed. Track the session in
-     `localStorage` keyed by book slug so progress survives a reload.
-   - *Quiz*: 10 cards sampled per round, weighted toward previously missed cards, score at the end
-     with the missed fronts listed and their chapter references linked back to the ladder.
-   Cards are embedded as a JS array in the page — no network calls of any kind.
+| # | id | What it holds | Source file |
+|---|----|---------------|-------------|
+| 1 | `about` | overview: premise, shape, what happens, how it ends, who should read the original | `retelling.md` |
+| 2 | `world` | cast and the book's vocabulary | `retelling.md` |
+| 3 | `plot` | sequential retelling, chapter by chapter | `retelling.md` |
+| 4 | `scenes` | key scenes with verbatim quotes, then the timeline | `retelling.md` |
+| 5 | `spine` | thesis + pillars as `details.pillar`, two levels deep | `spine.md` |
+| 6 | `map` | the claim table with strength chips | `argument-map.md` |
+| 7 | `quotes` | three tiers, rendered from `QUOTES_JSON`, each with a copy button | `quotes.md` |
+| 8 | `critique` | adversarial read, verdict pinned first | `critique.md` |
+| 9 | `reception` | documented critics with publication and date, sources at the end | `reception.md` |
+| 10 | `cards` | flip deck + 10-card quiz, progress in `localStorage` | `cards.md` / `anki.tsv` |
+| 11 | `drills` | free recall, elaboration, transfer, schedule, misses log | `drills.md` |
+| 12 | `apply` | positions as checkboxes, experiments, what to stop doing | `apply.md` |
+| 13 | `method` | depth, coverage, what was not read, how it was built and verified | `book.json` |
 
-9. **Apply** — the checklist from `apply.md`, checkboxes persisted in `localStorage`.
+Depth changes the volume inside these views, never their number: `quick` fills them thinly and
+`deep` fills them densely, but the reader finds the same thirteen entries in the same order in
+every pack.
 
-10. **Cross-book links** — only rendered when `links.md` exists.
+## Palette from the cover
+
+```bash
+python3 - <<'PY'
+import zipfile, glob, re
+z = zipfile.ZipFile(glob.glob('library/<slug>/*.epub')[0])
+name = [n for n in z.namelist() if re.search(r'cover.*\.(jpe?g|png)$', n, re.I)][0]
+open('/tmp/cover.jpg','wb').write(z.read(name))
+PY
+```
+
+Then look at the image, and quantise it for the actual values:
+
+```bash
+python3 -c "from PIL import Image; im=Image.open('/tmp/cover.jpg').convert('RGB').resize((160,240)); \
+print(sorted(im.quantize(colors=8).convert('RGB').getcolors(38400), reverse=True))"
+```
+
+Mapping, in this order:
+
+- **`--accent`** — the cover's dominant chromatic colour, darkened for the light theme until it
+  passes 4.5:1 on `--panel`, lightened for the dark theme until it passes 4.5:1 on `--ground`.
+- **`--steel`** — the cover's second colour (the type colour, the illustration, the spine band).
+  Used for secondary marks; must also stay readable in both themes.
+- **`--ground` / `--panel` / `--side`** — near-neutral, biased a few points toward the accent hue.
+  Never a pure grey and never a saturated tint: the text sits on these.
+- **`--accent-wash` / `--steel-wash`** — the same hues at the far end of the scale, for chips and
+  pinned cards.
+
+If the file has no cover image, derive the palette from the physical edition's binding and say so
+in `book.json`. Two books in the library must not end up with the same accent hue; check the
+existing `book.json` files before settling on one.
+
+## Verification before publishing
+
+1. Every `{{PLACEHOLDER}}` filled.
+2. `node --check` on the extracted `<script>`; open/close counts equal for `details`, `section`,
+   `div`, `table`, `blockquote`.
+3. Every quote on the page found verbatim in `source/chapters/` — the page renders only what the
+   Markdown files already contain, and nothing here may be written from memory.
+4. `python .claude/skills/book-distill/scripts/ru_lint.py library/<slug>/page.html` for a Russian
+   pack; fix everything outside verbatim quotes.
+5. Render both themes and look at them (`html2png` is on PATH), including one expanded pillar.
+6. Run the `ui-ux-pro-max` pre-delivery checklist: contrast in both themes, visible focus, touch
+   targets, no horizontal scroll at 375px, `prefers-reduced-motion` honoured.
 
 ## Constraints
 
-- Fully self-contained: inline CSS/JS, no CDN, no fonts, no external images. A strict CSP blocks
-  every external request.
-- Theme-aware per the Artifact rules: full light palette on bare `:root`, dark overrides in both
-  `@media (prefers-color-scheme: dark)` (guarded with `:root:not([data-theme="light"])`) and
-  `:root[data-theme="dark"]`, explicit token background on `body`.
-- Mobile-first: the ladder must stay readable at 375px. Tables and the argument map get their own
-  `overflow-x: auto` wrapper.
-- No fabricated content in the page — it renders only what the Markdown files already contain.
-- Keep the `<title>` short and stable across republishes: the book's short title.
+- Fully self-contained: inline CSS and JS, no CDN, no external images, no network calls.
+- Theme-aware exactly as the template does it: full light palette on bare `:root`, dark overrides
+  in `@media (prefers-color-scheme: dark)` guarded with `:root:not([data-theme="light"])`, and
+  again under `:root[data-theme="dark"]`.
+- Mobile: the rail collapses behind the burger below 900px; tables scroll inside `.scroller`.
+- `<title>` short and stable across republishes.

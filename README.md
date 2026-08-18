@@ -1,24 +1,29 @@
 # books — learn a book without reading it
 
-Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into `library/` and ask Claude Code:
+Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into `input/` and ask Claude Code:
 
 ```
-distill Antifragile.epub
+distill
 ```
+
+Naming the file works too (`distill Antifragile.epub`), but with one book waiting in `input/`
+there is nothing to name. Ingest files the book away for you: it derives a slug, moves the file
+into `library/<slug>/`, extracts the text, and leaves `input/` empty for the next book.
 
 You get a directory of plain Markdown you own, plus an interactive page you can open in a browser —
 all of it inside the book's own folder:
 
 ```
+input/                    empty again after ingest
 library/antifragile/
-  Antifragile.epub      your copy
-  source/               the extracted text
+  Antifragile.epub        your copy, moved here
+  source/                 the extracted text
   notes/  spine.md  quotes.md  critique.md  cards.md  ...
   book.json  page.html
 ```
 
-**`library/` is gitignored in full.** Books and packs stay on your machine; the repo carries the
-pipeline and nothing else.
+**`input/` and `library/` are gitignored in full.** Books and packs stay on your machine; the repo
+carries the pipeline and nothing else.
 
 ## What comes out
 
@@ -33,7 +38,25 @@ pipeline and nothing else.
 | `drills.md` | Free-recall prompts, "why is this true?" questions, spaced schedule |
 | `apply.md` | Decisions and experiments the book implies |
 | `links.md` | How this book agrees with / contradicts the others in your library |
-| `page.html` | Interactive page: expandable claim ladder, quote cards, flip-cards, self-graded quiz |
+| `page.html` | Interactive page: thirteen views from retelling to deck, same structure for every book |
+
+## The page
+
+Every book gets the same page: an app shell with a rail of thirteen views in a fixed order —
+**О чём книга · Кто есть кто · Пересказ · Сцены · Стержень · Карта · Цитаты · Разбор · Что
+говорили критики · Проверка · Упражнения · Применение · Метод**. The structure never changes from
+book to book, so the second pack reads like the first and you never hunt for a section. Depth
+changes how densely the views are filled; it never changes how many there are.
+
+What *is* per book is the colour: the palette is taken from that edition's cover — dominant colour
+becomes the accent, the type colour becomes the second accent, the neutrals get biased toward it.
+Two packs never look the same, and each looks like its book.
+
+The shell lives in `.claude/skills/book-distill/reference/page-template.html` and is committed with
+the pipeline. Pass 5 fills its placeholders and runs the
+[`ui-ux-pro-max`](https://github.com/mrgoonie/ui-ux-pro-max-skill) skill, which is **required** for
+that pass — it carries the contrast, focus, touch-target and typography checks the page is held to,
+and its pre-delivery checklist gates publishing.
 
 ## Why it is built this way
 
@@ -48,7 +71,7 @@ The other half of the value is the part summary apps skip: an honest critique, a
 
 | Ask for | What happens |
 |---------|--------------|
-| `distill <file> [depth] [lang:xx]` | Full pipeline — see **Depth** and **Language** below |
+| `distill [file] [depth] [lang:xx]` | Full pipeline on whatever is in `input/` — see **Depth** and **Language** below |
 | `quiz <book>` | Interactive retrieval session in chat; misses are logged and come first next time |
 | `ask <book> <question>` | Answers grounded in the notes, cited by chapter |
 | `teach <book> <pillar>` | You explain it; Claude finds where your explanation breaks |
@@ -74,15 +97,16 @@ objection — not because it says the same things at greater length.
 The pack is written **in the language of the book** by default. Override per run:
 
 ```
-distill Antifragile.epub deep lang:ru
+distill deep lang:ru
 ```
 
 Both the book's own language and the pack's are recorded in `book.json`.
 
 ## Requirements
 
-- Python 3 (stdlib only) for EPUB/FB2/TXT.
+- Python 3 (stdlib only) for EPUB/FB2/TXT; Pillow only if you want the cover quantised for you.
 - `pdftotext` (poppler) for PDFs. Scanned PDFs without a text layer will not work — convert first.
+- The `ui-ux-pro-max` skill installed — pass 5 requires it.
 
 ## Manual script use
 

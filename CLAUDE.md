@@ -1,16 +1,22 @@
 # books
 
-A personal book-distillation library. Drop a book file in `library/`; the `book-distill` skill
-turns it into a layered study pack plus an interactive page, all of it in the book's own directory.
+A personal book-distillation library. Drop a book file in `input/`; the `book-distill` skill
+files it into `library/<book-slug>/` and turns it into a layered study pack plus an interactive
+page, all of it in the book's own directory.
 
 ## Layout
 
-Git holds the skill and these docs. **Everything about every book is local only** — `library/` is
-gitignored in full, because the books are the user's copies and the packs quote them at length.
+Git holds the skill and these docs. **Everything about every book is local only** — `input/` and
+`library/` are gitignored in full, because the books are the user's copies and the packs quote
+them at length.
 
 ```
 .claude/skills/book-distill/   the pipeline (see its SKILL.md)
+  reference/page-template.html the shared page shell — same structure for every book
 CLAUDE.md  README.md           committed
+
+input/                         the drop zone — gitignored, emptied by ingest
+  <Any Book File>.epub         a new book waits here until pass 0 files it away
 
 library/<book-slug>/           one directory per book — gitignored, never committed
   <Book File>.epub             the user's own copy
@@ -35,6 +41,24 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   (18–24k words, ~80 cards). `deep` earns its length with more of the book — denser retelling,
   more scenes, more quotes, more objections — never with padding.
 
+- **`input/` is the only drop zone.** A book file sitting there is not a library entry yet —
+  pass 0 derives the slug, creates `library/<book-slug>/`, moves the file in (`mv`, so the
+  user's copy is never duplicated), extracts, and leaves `input/` empty again. A book file
+  found anywhere else in the tree is treated the same way. Never distill a book in place in
+  `input/`, and never leave a copy behind there.
+
+- **Every page has the same structure.** `library/<slug>/page.html` is built from
+  `.claude/skills/book-distill/reference/page-template.html`: the same thirteen views in the same
+  order, the same components, the same JavaScript. Per book only the content, the depth and the
+  palette change. Never design a page layout per book.
+
+- **The palette comes from the book's cover** — dominant colour to `--accent`, second colour to
+  `--steel`, neutrals biased toward the accent hue, contrast checked in both themes. That is the
+  one place a pack is allowed to look different from its neighbours.
+
+- **Pass 5 requires the `ui-ux-pro-max` skill.** Load it before touching the page; its
+  pre-delivery checklist is the gate before publishing.
+
 - Invoke the `book-distill` skill for anything involving a book in this folder: distilling,
   quizzing, asking questions about one, or connecting several.
 - Book slugs are lowercase-hyphenated short titles: `library/antifragile/`, not
@@ -44,10 +68,10 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   match means the quote is dropped.
 - Never overstate coverage: if chapters were sampled rather than fully read, `book.json` and
   `spine.md` say which.
-- Nothing under `library/` is committed — not the book file, not `source/`, not the pack, not the
-  page. `.gitignore` enforces it (`/library/*`, plus the book extensions anywhere in the tree, in
-  case a file is dropped outside by mistake). Never work around it to "back up" a pack; the packs
-  are the user's private study material, and the repo is the tooling.
+- Nothing under `input/` or `library/` is committed — not the book file, not `source/`, not the
+  pack, not the page. `.gitignore` enforces it (`/input/*`, `/library/*`, plus the book extensions
+  anywhere in the tree, in case a file is dropped outside by mistake). Never work around it to
+  "back up" a pack; the packs are the user's private study material, and the repo is the tooling.
 
 ## Machine notes (macOS, moved here 2026-08-17)
 
