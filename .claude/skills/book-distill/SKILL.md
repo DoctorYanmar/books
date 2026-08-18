@@ -157,9 +157,13 @@ the thesis:
 templates, chosen by what the chapter is:
 
 - **Template A, argumentative chapter** — `Claim` (the chapter's claim as a proposition, not its
-  topic) → `How it goes` (situation, complication, answer, in the author's order) →
-  `What holds it up` (evidence bullets, each naming what it proves) → `Left open` →
-  `Next` (the question handed to the next chapter).
+  topic) → **the position** (what the chapter argues against, every term glossed as it appears) →
+  **the mechanism** (why the claim follows, step by step, joined by because/therefore/but) →
+  `What holds it up` (evidence bullets, each carrying both halves: the fact, then what it proves)
+  → `Left open` → `Next` (the question handed to the next chapter). The two middle blocks get
+  labels written fresh for that chapter, and they carry 140–260 words at `deep` — that middle is
+  the part the reader cannot reconstruct alone, and cutting it is how the first version of this
+  pipeline produced retellings nobody could read.
 - **Template B, narrative chapter** — `Where we are` (only if the setting changed) →
   `What happens` (the turn, built with "therefore" and "but") → `Stakes` (what is lost if it
   fails) → `Next`. Labels are translated with the pack; the mapping lives in the standard.
@@ -174,10 +178,52 @@ Run the linter before moving on; it exits non-zero on any violation:
 python3 .claude/skills/book-distill/scripts/retell_lint.py library/<slug>/retelling.md --depth <depth>
 ```
 
-It checks blocks per chapter, word budget, sentence length, density of names and numbers, chain
-openers ("then", "next", "separately"…), causal connectives, topic chaining, the forward link, and
-that `[analysis]` never sits inside a `[book]` block. It cannot see a lost point — list them from
-`notes/` and confirm each one by eye.
+It checks blocks per chapter, word budget, the words spent on position and mechanism, sentence
+length and its spread, density of names and numbers, spelled-out numerals, both halves of every
+evidence bullet, unglossed first mentions, chain openers ("then", "next", "separately"…), causal
+connectives, topic chaining, the forward link, and that `[analysis]` never sits inside a `[book]`
+block. It cannot see a lost point — list them from `notes/` and confirm each one by eye.
+
+### Pass 2.6 — Cold read (the comprehension gate)
+
+The linter measures mechanics and nothing else. A retelling can score zero violations and still be
+unreadable — that is not hypothetical, it is what the first version of this pipeline shipped. So
+every chapter is read by someone who has never seen the book.
+
+Spawn one subagent per chapter with **no access to `source/`, `notes/`, or the rest of the pack** —
+it gets the chapter block from `retelling.md` and nothing else.
+
+**Set the reader's baseline explicitly, or the gate is unfalsifiable.** The cold reader is an
+educated adult with ordinary general knowledge: everyday vocabulary, school history and geography,
+and the common words of public life — inflation, shares, bonds, subsidy, monopoly, a veto, a
+president's name, a blast furnace. What they do **not** have is anything specific to this book: its
+author, its argument, its cases, its coinages, and the jargon of its field. A reader told to disown
+all knowledge flags «инфляция» and «Рейган», nothing can ever pass, and the loop burns budget
+forever — that happened on the first run of this gate.
+
+It answers, in the pack's language:
+
+1. What is this chapter claiming? (one sentence, in its own words)
+2. Why does that follow? Give the steps.
+3. Name one piece of evidence and say what it is supposed to prove.
+4. List every term, name or institution **specific to this book or its field** that the chapter
+   uses without explaining — not words an educated adult already knows.
+5. Quote every sentence whose meaning you could not get on one reading.
+
+A chapter passes when 1–3 are answered correctly and 4–5 come back empty. Anything in 4 or 5 is a
+defect in the text, never in the reader: gloss the term, split the sentence, restore the missing
+step, and send the chapter back through. Record the outcome in `book.json` under
+`verification.cold_read` — chapters passed, chapters revised, and what the readers flagged.
+
+Do not skip this pass because the linter is green. Green mechanics with a failed cold read is the
+exact failure mode this gate exists for.
+
+Two practical rules learned the expensive way. **Read the flags before acting on them** — a flag on
+a book-specific coinage is a defect, a flag on ordinary vocabulary is a miscalibrated reader, and
+only the first kind gets fixed. And **do not put the linter loop inside the writing agent**: one
+write, then the linter run once by the caller, then one cold read, then the caller fixes the flagged
+sentences. The first run of this pipeline let each writer iterate against the linter on its own and
+spent 3.2M tokens across 44 agents for eleven chapters.
 
 Templates for the other layers are in `reference/layers.md`. Only after all this comes the spine,
 the map and the critique.
@@ -234,6 +280,19 @@ id or drop a section. Depth changes how densely the sections are filled, not how
 
 `library/1984/` and `library/frankenstein/` were built before this skeleton and keep the pages
 they already have. Do not rebuild them unless the user asks.
+
+**The chapter articles are generated from `retelling.md`, never typed twice.** The retelling is the
+source of truth for that block; the page is a rendering of it:
+
+```bash
+python3 .claude/skills/book-distill/scripts/build_chaps.py library/<slug>/retelling.md library/<slug>/page.html
+```
+
+It rewrites everything inside `<div class="chaps">` and maps the markdown onto the template's
+components: the claim becomes `p.lead`, the fixed slots keep the mono `span.lbl` chip, the
+per-chapter labels of the position and mechanism blocks become `span.say` (sentence case, serif —
+a claim is not a slot name), evidence becomes a `ul`, and `> **разбор.**` becomes `p.an-block`.
+Run it again after any edit to the retelling, so the two never drift apart.
 
 **Two of the nine sections are graphs, not prose.** They are what makes the argument readable at a
 glance, so they are built the same way in every pack:

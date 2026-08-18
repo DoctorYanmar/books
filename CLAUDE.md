@@ -48,11 +48,14 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   found anywhere else in the tree is treated the same way. Never distill a book in place in
   `input/`, and never leave a copy behind there.
 
-- **The chapter retelling follows `reference/retelling-standard.md`.** Claim-first heading, two to
-  four points per chapter instead of one wall, causal connectives instead of "then", a stated stake
-  and a link to the next chapter. `scripts/retell_lint.py` gates it before pass 3: it measures
-  blocks, word budget, sentence length, density of names and numbers, chain openers, causal
-  connectives and topic chaining. Fix the prose, never the limit.
+- **The chapter retelling follows `reference/retelling-standard.md`.** It is written for someone
+  who has not read the book, so the test it has to pass is comprehension, not compression: a
+  claim-first heading, then the position, then the mechanism spelled out step by step, then
+  evidence bullets that carry both the fact and what it proves, then a link to the next chapter.
+  Every name is glossed where it first appears. Two gates, and the second one matters more:
+  `scripts/retell_lint.py` measures the mechanics, and the pass 2.6 **cold read** puts the chapter
+  in front of a reader who has never seen the book and fails it on any term they did not know or
+  sentence they had to read twice. Fix the prose, never the limit.
 
 - **Every page has the same skeleton.** `library/<slug>/page.html` is built from
   `.claude/skills/book-distill/reference/page-template.html`: one scroll, a collapsible left menu,
