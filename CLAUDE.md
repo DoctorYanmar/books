@@ -101,5 +101,9 @@ stdlib only.
   (`brew install poppler` if it ever goes missing). Verified on this Mac against `1984.epub`:
   29 chapter files, 85,405 words.
 - Run the scripts with the system `python3` (3.13 here). No venv, no pip install.
-- Git remote: private repo `DoctorYanmar/books` (created 2026-08-17). The library is private
-  because the packs quote copyrighted books at length; keep it that way.
+- Git remote: **public** repo `DoctorYanmar/books`, MIT licensed (opened 2026-08-18 on a fresh
+  history; the previous repository was deleted because force-pushed commits containing the 1984 and
+  frankenstein packs stayed reachable on GitHub by SHA). The repo is public, the library is not:
+  `input/` and `library/` are gitignored in full because the packs quote copyrighted books at
+  length. Never commit book content — once pushed it stays reachable by commit SHA even after a
+  force-push, which is what forced the repo migration in the first place.
