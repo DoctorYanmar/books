@@ -40,6 +40,16 @@ carries the pipeline and nothing else.
 | `links.md` | How this book agrees with / contradicts the others in your library |
 | `page.html` | Interactive page: nine sections from retelling to deck, same skeleton for every book |
 
+## The retelling
+
+The chapter retelling is written for someone who will never open the book, and it is held to a
+standard rather than to taste. Every chapter gets a claim-like heading, two to four блока instead
+of one paragraph, connectives that name a cause instead of «затем», a stated stake, and a line
+handing a question to the next chapter. `scripts/retell_lint.py` measures all of that — word
+budget, sentence length, density of names and numbers, chain openers, causal connectives, topic
+chaining — and pass 3 does not start until it is clean. The reasoning and the sources are in
+`.claude/skills/book-distill/reference/retelling-standard.md`.
+
 ## The page
 
 Every book gets the same page: one scroll, a collapsible left menu, and nine sections in a fixed

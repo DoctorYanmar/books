@@ -13,6 +13,7 @@ them at length.
 ```
 .claude/skills/book-distill/   the pipeline (see its SKILL.md)
   reference/page-template.html the shared page skeleton — same sections for every new book
+  reference/retelling-standard.md how chapter retellings are written and checked
 CLAUDE.md  README.md           committed
 
 input/                         the drop zone — gitignored, emptied by ingest
@@ -46,6 +47,12 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   user's copy is never duplicated), extracts, and leaves `input/` empty again. A book file
   found anywhere else in the tree is treated the same way. Never distill a book in place in
   `input/`, and never leave a copy behind there.
+
+- **The chapter retelling follows `reference/retelling-standard.md`.** Claim-first heading, two to
+  four микротемы per chapter instead of one wall, «поэтому/но» instead of «затем», a stated stake
+  and a link to the next chapter. `scripts/retell_lint.py` gates it before pass 3: it measures
+  blocks, word budget, sentence length, density of names and numbers, chain openers, causal
+  connectives and topic chaining. Fix the prose, never the limit.
 
 - **Every page has the same skeleton.** `library/<slug>/page.html` is built from
   `.claude/skills/book-distill/reference/page-template.html`: one scroll, a collapsible left menu,

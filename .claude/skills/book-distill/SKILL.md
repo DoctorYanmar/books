@@ -145,13 +145,41 @@ the thesis:
 - `retelling/cast` — who is who, one line each, with their function in the story.
 - `retelling/world` — for speculative or technical books: the rules of the world, the institutions,
   the vocabulary the book invents.
-- `retelling/plot` — sequential retelling, part by part and chapter by chapter. Dense, concrete,
-  with the scenes that actually happen — not "the protagonist struggles with the regime". This is
-  the longest single piece of the pack and it is what makes the reader feel they have read the book.
+- `retelling/plot` — the chapter-by-chapter retelling, written to the standard below. This is the
+  longest single piece of the pack and the part the reader judges everything else by.
 - `retelling/scenes` — 6–10 key scenes in close-up, each with a verbatim quote.
 - `retelling/timeline` — the order of events when the book scrambles it.
+- `retelling/self-check` — 3–5 questions the reader answers from memory before leaving the section,
+  one per микротема. The research is blunt: the gain comes from *producing* a summary, not reading
+  one, so the retelling must end by making the reader produce something.
 
-Templates in `reference/layers.md`. Only after this comes the spine, the map and the critique.
+**The chapter retelling follows `reference/retelling-standard.md`, and it is not optional.** Two
+templates, chosen by what the chapter is:
+
+- **Template A, argumentative chapter** — `Утверждение` (the chapter's claim as a proposition, not
+  its topic) → `Как получилось` (situation, complication, answer, in the author's order) →
+  `Чем держится` (evidence bullets, each naming what it proves) → `Что осталось открытым` →
+  `Дальше` (the question handed to the next chapter).
+- **Template B, narrative chapter** — `Где мы` (only if the setting changed) → `Что происходит`
+  (the turn, built with «поэтому» and «но») → `Ставка` (what is lost if it fails) → `Дальше`.
+
+The unit is the микротема, not the chapter: split a chapter into 2–4 blocks, merge two thin
+chapters into one entry. Chapter headings are claim-like — the book's own chapter title is not
+enough, because a title names a topic and the reader needs the point.
+
+Run the linter before moving on; it exits non-zero on any violation:
+
+```bash
+python3 .claude/skills/book-distill/scripts/retell_lint.py library/<slug>/retelling.md --depth <depth>
+```
+
+It checks blocks per chapter, word budget, sentence length, density of names and numbers, chain
+openers («Затем», «Дальше», «Отдельно»…), causal connectives, topic chaining, the forward link, and
+that `[разбор]` never sits inside a `[книга]` block. It cannot see a lost микротема — list them from
+`notes/` and confirm each one by eye.
+
+Templates for the other layers are in `reference/layers.md`. Only after all this comes the spine,
+the map and the critique.
 
 ### Pass 3 — Synthesis
 
@@ -381,5 +409,8 @@ The user can ask for a single stage instead of the whole pipeline:
    left menu, and the same node graphs in «Лестница опор» and «Карта». Per book only the content,
    the depth and the palette change — and the palette comes from that book's cover. The two packs
    that predate the skeleton, `1984` and `frankenstein`, keep their pages.
-9. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
+9. The chapter retelling follows `reference/retelling-standard.md` and passes `retell_lint.py`
+   before pass 3 starts. A chapter written as one dense paragraph, opening on a detail instead of a
+   claim and chained with «затем», is a defect however accurate it is.
+10. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
    after the page turns out wrong.
