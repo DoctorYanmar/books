@@ -68,7 +68,7 @@ The interactive page is built from a shared template, not written from scratch:
 
 ```
 .claude/skills/book-distill/reference/
-  page-template.html   the app shell every page uses: same views, same components, same JS
+  page-template.html   the page skeleton every new book uses: same sections, same components, same JS
   interactive.md       what each view holds, how the palette is derived, how to verify
 ```
 
@@ -197,11 +197,29 @@ never trivia ("what year was the study?" is a bad card).
 
 ### Pass 5 — Interactive page
 
-**The page has one structure, shared by every book in the library.** It lives in
-`reference/page-template.html`: an app shell with a numbered rail and thirteen views in a fixed
-order — about, world, plot, scenes, spine, map, quotes, critique, reception, cards, drills, apply,
-method. Fill its `{{PLACEHOLDER}}` slots; never invent a section order, rename an id or drop a
-view. Depth changes how densely the views are filled, not how many there are.
+**The page has one skeleton, shared by every book distilled from now on.** It lives in
+`reference/page-template.html`: a single scroll with a collapsible left menu and nine sections in
+a fixed order — `pereskaz`, `lestnica`, `karta`, `citaty`, `kritiki`, `razbor`, `povtorenie`,
+`primenenie`, `svyazi`. Fill its `{{PLACEHOLDER}}` slots; never invent a section order, rename an
+id or drop a section. Depth changes how densely the sections are filled, not how many there are.
+
+`library/1984/` and `library/frankenstein/` were built before this skeleton and keep the pages
+they already have. Do not rebuild them unless the user asks.
+
+**Two of the nine sections are graphs, not prose.** They are what makes the argument readable at a
+glance, so they are built the same way in every pack:
+
+- **«Лестница опор»** — one node per pillar, chained from a root node holding the thesis. Solid
+  edges run along the load-bearing chain; dashed edges lead to the side pillars, the ones the
+  thesis survives without. Every edge carries a short label saying what the step is. A switch
+  above the graph dims the side pillars («несущий путь»), and one button opens or closes every
+  node. Which pillars are load-bearing is an `[analysis]` call and is marked as one on the page.
+- **«Карта аргументации»** — one node per pillar; inside it a solid branch of supports and a
+  dashed branch of objections, each objection labelled with the claim it attacks. The dense table
+  stays available behind a «схема / таблица» switch.
+
+Nodes are `<details>` elements: keyboard support, `Esc`, and deep linking come for free, and no
+absolute positioning means nothing can overlap at any width.
 
 **Two skills are mandatory before writing it**, in this order:
 
@@ -211,12 +229,15 @@ view. Depth changes how densely the views are filled, not how many there are.
 2. `artifact-design` — for the publishing mechanics of the Artifact itself.
 
 **The palette is the one thing designed per book, and it is taken from the book's cover** — pull
-the cover image out of the file, read its dominant colours, map them onto `--accent` and `--steel`,
-and bias the neutrals a few points toward the accent hue. Two books in the library must not share
-an accent hue.
+the cover image out of the file, read its dominant colours, map them onto `--stamp` and `--ochre`,
+and bias the neutrals a few points toward the accent hue. One exception, and it must be recorded
+in `book.json`: the skeleton already spends red on weak claims and objections, so a cover whose
+dominant colour is a red or crimson cannot supply the accent — take the cover's second colour, or
+a neighbour of it, and say in `book.json` why. Two books in the library must not share an accent
+hue.
 
-`reference/interactive.md` carries the slot list, the view-to-file mapping, the palette procedure
-and the verification steps. Record the returned URL in `book.json`.
+`reference/interactive.md` carries the slot list, the section-to-file mapping, the graph markup,
+the palette procedure and the verification steps. Record the returned URL in `book.json`.
 
 ### Pass 6 — Cross-book links (only when ≥2 books exist)
 
@@ -356,7 +377,9 @@ The user can ask for a single stage instead of the whole pipeline:
    ever committed or pushed. Never work around the ignore rules to "back up" a pack.
 7. `input/` holds books that have not been ingested yet, nothing else. Pass 0 empties it by moving
    the file, never by copying or deleting it.
-8. Every page in the library has the same thirteen views in the same order. Per book only the
-   content, the depth and the palette change — and the palette comes from that book's cover.
+8. Every page built from now on has the same nine sections in the same order, the same collapsible
+   left menu, and the same node graphs in «Лестница опор» and «Карта». Per book only the content,
+   the depth and the palette change — and the palette comes from that book's cover. The two packs
+   that predate the skeleton, `1984` and `frankenstein`, keep their pages.
 9. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
    after the page turns out wrong.

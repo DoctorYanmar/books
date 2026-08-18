@@ -1,827 +1,680 @@
 <title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  :root {
-    /* ПАЛИТРА КНИГИ — единственное, что меняется от книги к книге.
-       Берётся с обложки: доминирующий цвет -> accent, второй -> steel.
-       Имена токенов и всё остальное в файле не трогать. */
+:root{
 {{PALETTE_LIGHT}}
+  --side-w:268px;
+  --topbar-h:54px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+{{PALETTE_DARK}}
+  }
+}
+:root[data-theme="dark"]{
+{{PALETTE_DARK}}
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+}
+h1,h2,h3,h4{font-family:"Old Standard TT",Georgia,"Times New Roman",serif;font-weight:700;text-wrap:balance;line-height:1.16;margin:0}
+p{margin:0}
+a{color:var(--stamp)}
+:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.col{max-width:64ch}
+.skip{position:absolute;left:8px;top:-60px;z-index:70;background:var(--stamp);color:var(--paper);padding:10px 16px;border-radius:4px;text-decoration:none;font-size:14px}
+.skip:focus{top:8px}
 
-    --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-    --body: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --mono: "Cascadia Mono", Consolas, "SF Mono", ui-monospace, monospace;
+/* ---------- верхняя полоса ---------- */
+.topbar{
+  position:fixed;inset:0 0 auto 0;height:var(--topbar-h);z-index:40;
+  display:flex;align-items:center;gap:10px;padding:0 10px;
+  background:var(--paper-2);border-bottom:1px solid var(--rule);
+}
+.topbar .tt{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.topbar .tt b{font-family:"Old Standard TT",Georgia,serif;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .tt i{font-family:"IBM Plex Mono",ui-monospace,monospace;font-style:normal;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-width:44px;min-height:44px;padding:0 10px;
+  background:none;border:1px solid transparent;border-radius:6px;color:var(--ink-2);cursor:pointer;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+.iconbtn:hover{background:var(--stamp-soft);color:var(--stamp);border-color:var(--rule)}
+.iconbtn svg{width:19px;height:19px;flex:none}
+.iconbtn .ic-close{display:none}
+html.nav-open #menuBtn .ic-open{display:none}
+html.nav-open #menuBtn .ic-close{display:inline}
+.topbar .iconbtn.theme{margin-left:auto}
+.topbar .iconbtn.theme .lbl{display:none}
+@media (min-width:760px){.topbar .iconbtn.theme .lbl{display:inline}}
 
-    --s-xs: 0.72rem;
-    --s-sm: 0.83rem;
-    --s-md: 0.94rem;
-    --s-base: 1.0625rem;
-    --s-lg: clamp(1.12rem, 1.04rem + 0.32vw, 1.3rem);
-    --s-xl: clamp(1.3rem, 1.12rem + 0.85vw, 1.72rem);
-    --s-2xl: clamp(1.95rem, 1.4rem + 2.3vw, 3rem);
+/* ---------- боковое меню ---------- */
+.sidenav{
+  position:fixed;left:0;top:var(--topbar-h);bottom:0;width:var(--side-w);z-index:50;
+  background:var(--paper-2);border-right:1px solid var(--rule);
+  display:flex;flex-direction:column;gap:0;overflow-y:auto;overscroll-behavior:contain;
+  transform:translateX(-100%);visibility:hidden;
+  transition:transform .22s ease,visibility .22s ease;
+}
+html.nav-open .sidenav{transform:none;visibility:visible}
+.sidenav .head{padding:18px 20px 14px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:4px}
+.sidenav .head b{font-family:"Old Standard TT",Georgia,serif;font-size:19px;line-height:1.2}
+.sidenav .head span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.sidelist{list-style:none;margin:0;padding:10px 10px 16px;display:flex;flex-direction:column;gap:2px}
+.sidelist a{
+  display:flex;align-items:center;gap:12px;min-height:44px;padding:6px 12px;border-radius:6px;
+  text-decoration:none;color:var(--ink-2);font-size:15px;
+  transition:background .18s ease,color .18s ease;
+}
+.sidelist a:hover{background:var(--stamp-soft);color:var(--stamp)}
+.sidelist a .num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink-3);flex:none}
+.sidelist a[aria-current="true"]{background:var(--stamp-soft);color:var(--stamp);font-weight:600}
+.sidelist a[aria-current="true"] .num{color:var(--stamp)}
+.sidenav .foot{margin-top:auto;padding:16px 20px 22px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+.scrim{position:fixed;inset:var(--topbar-h) 0 0 0;z-index:45;background:#0B0F1099;backdrop-filter:blur(2px);border:0}
+.scrim[hidden]{display:none}
+@media (min-width:1120px){
+  .scrim{display:none}
+  html.nav-open .shell{margin-left:var(--side-w)}
+}
 
-    --side-w: 272px;
-    --gutter: clamp(20px, 3.2vw, 56px);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-{{PALETTE_DARK_MEDIA}}
-    }
-  }
-  :root[data-theme="dark"] {
-{{PALETTE_DARK_ATTR}}
-  }
+/* ---------- содержимое ---------- */
+.shell{padding-top:var(--topbar-h)}
+section{padding:60px 0;border-bottom:1px solid var(--rule);scroll-margin-top:calc(var(--topbar-h) + 10px)}
 
-  *, *::before, *::after { box-sizing: border-box; }
-  [hidden] { display: none !important; }
+/* ---------- шапка ---------- */
+.masthead{border-bottom:2px solid var(--ink);background:var(--paper-2)}
+.masthead .wrap{display:flex;flex-direction:column;gap:26px;padding-top:40px;padding-bottom:30px}
+.tag{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.title{font-size:clamp(38px,7vw,80px);letter-spacing:-.015em}
+.subtitle{font-family:"Old Standard TT",Georgia,serif;font-style:italic;font-size:clamp(19px,2.4vw,26px);color:var(--ink-2);max-width:30ch;line-height:1.3}
+.byline{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;font-size:15px;color:var(--ink-2)}
+.byline b{font-weight:600;color:var(--ink)}
+.thesis{border-left:3px solid var(--stamp);padding:2px 0 2px 18px;font-size:clamp(18px,2.2vw,23px);line-height:1.42;max-width:56ch}
+.ledger{display:grid;grid-template-columns:repeat(auto-fit,minmax(146px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.ledger div{background:var(--paper-2);padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.ledger .n{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:20px;font-variant-numeric:tabular-nums;color:var(--stamp)}
+.ledger .l{font-size:12.5px;color:var(--ink-3);line-height:1.35}
 
-  body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font-family: var(--body);
-    font-size: var(--s-base);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    scroll-behavior: smooth;
-  }
-  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+/* ---------- заголовки разделов ---------- */
+.sechead{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.sechead h2{font-size:clamp(27px,4vw,42px)}
+.sechead p{color:var(--ink-2);max-width:62ch}
+h3{font-size:22px;margin-bottom:10px}
+h4{font-size:17px;font-family:"IBM Plex Sans",sans-serif;font-weight:600;letter-spacing:.01em}
+.stack{display:flex;flex-direction:column;gap:22px}
+.stack-s{display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.note{font-size:14.5px;color:var(--ink-3);max-width:62ch}
+.mark{display:inline-block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--rule);color:var(--ink-3);vertical-align:2px}
+.mark.an{color:var(--ochre);border-color:var(--ochre)}
+.an-block{border-left:2px dotted var(--ochre);padding-left:14px;color:var(--ink-2)}
 
-  /* каркас: две независимо прокручиваемые панели */
-  .app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); align-items: start; }
+/* ---------- пересказ ---------- */
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 26px}
+.who div{padding:11px 0;border-top:1px solid var(--rule);font-size:15.5px;color:var(--ink-2)}
+.who b{color:var(--ink);font-weight:600}
+.plot{display:flex;flex-direction:column}
+.plot article{display:grid;grid-template-columns:minmax(120px,180px) 1fr;gap:8px 28px;padding:20px 0;border-top:1px solid var(--rule)}
+.plot h4{font-family:"Old Standard TT",Georgia,serif;font-weight:700;font-size:19px;color:var(--stamp)}
+.plot p{max-width:70ch;color:var(--ink-2)}
+@media (max-width:640px){.plot article{grid-template-columns:1fr}}
+.scene{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.scene h4{font-family:"Old Standard TT",Georgia,serif;font-size:20px;font-weight:700}
+.scene .ch{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase}
+.scene blockquote{margin:0;font-family:"Old Standard TT",Georgia,serif;font-style:italic;font-size:17.5px;color:var(--ink);border-left:2px solid var(--stamp);padding-left:14px}
+.time{display:flex;flex-direction:column}
+.time div{display:grid;grid-template-columns:110px 1fr;gap:18px;padding:9px 0;border-top:1px solid var(--rule);font-size:15.5px;color:var(--ink-2)}
+.time span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:var(--stamp);font-size:14px;padding-top:2px}
 
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: 100dvh;
-    background: var(--side);
-    border-right: 1px solid var(--line);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    display: flex;
-    flex-direction: column;
-    padding: 22px 12px 18px;
-    scrollbar-width: thin;
-  }
-  .brand { padding: 0 12px 16px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
-  .brand-title {
-    font-family: var(--display); font-size: 1.7rem; line-height: 1;
-    letter-spacing: -.02em; font-variant-numeric: lining-nums;
-  }
-  .brand-sub { font-size: var(--s-sm); color: var(--muted); margin-top: 6px; line-height: 1.4; }
+/* ---------- схема: узлы и пути ---------- */
+.flowbox{display:flex;flex-direction:column}
+.flowbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
+.flowbar .sw{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.flowbar .sw button{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  min-height:40px;padding:0 14px;border:0;background:none;color:var(--ink-2);cursor:pointer;
+  transition:background .18s ease,color .18s ease;
+}
+.flowbar .sw button + button{border-left:1px solid var(--rule)}
+.flowbar .sw button:hover{background:var(--stamp-soft);color:var(--stamp)}
+.flowbar .sw button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.flowbar .iconbtn{border-color:var(--rule)}
+.flowbar .legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.flowbar .legend i{display:inline-block;width:22px;height:0;border-top:2px solid var(--wire);vertical-align:middle;margin-right:6px}
+.flowbar .legend i.sec{border-top-style:dashed;border-top-color:var(--ochre)}
+.flowbar .legend i.contra{border-top-style:dashed;border-top-color:var(--alarm)}
+@media (max-width:720px){.flowbar .legend{margin-left:0}}
 
-  .nav { display: flex; flex-direction: column; gap: 1px; }
-  .nav button {
-    appearance: none; background: none; border: 0; width: 100%;
-    display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: baseline; gap: 9px;
-    padding: 9px 12px; border-radius: 4px; cursor: pointer; text-align: left;
-    color: var(--muted); font-family: var(--body); font-size: var(--s-md); line-height: 1.35;
-    transition: background 160ms ease, color 160ms ease;
-  }
-  .nav button .n {
-    font-family: var(--mono); font-size: var(--s-xs); color: var(--faint);
-    font-variant-numeric: tabular-nums;
-  }
-  .nav button:hover { background: var(--panel-2); color: var(--ink); }
-  .nav button[aria-current="true"] { background: var(--accent-wash); color: var(--accent-ink); font-weight: 600; }
-  .nav button[aria-current="true"] .n { color: var(--accent); }
-  .nav .group {
-    font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .13em;
-    text-transform: uppercase; color: var(--faint); padding: 18px 12px 6px;
-  }
-  .side-foot {
-    margin-top: auto; padding: 18px 12px 0; border-top: 1px solid var(--line);
-    font-family: var(--mono); font-size: var(--s-xs); color: var(--faint); line-height: 1.75;
-  }
+.flownote{margin:-6px 0 20px;font-size:14px;color:var(--ink-3);max-width:74ch}
+.flow{display:flex;flex-direction:column;padding-top:6px}
+.fedge{position:relative;height:38px;display:flex;align-items:center;justify-content:center}
+.fedge::before{content:"";position:absolute;top:0;bottom:0;left:50%;transform:translateX(-1px);width:2px;background:var(--wire)}
+.fedge.sec::before{background:repeating-linear-gradient(to bottom,var(--ochre) 0 5px,transparent 5px 11px)}
+.fedge .elabel{
+  position:relative;background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:3px 11px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+}
+.fedge.sec .elabel{border-color:var(--ochre);color:var(--ochre)}
 
-  .main { min-width: 0; }
-  .page { max-width: 940px; margin: 0 auto; padding: 0 var(--gutter) 120px; }
+.fnode{position:relative;border:1px solid var(--rule);border-radius:12px;background:var(--card);transition:border-color .2s ease,box-shadow .2s ease,opacity .2s ease}
+.fnode::before,.fnode::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:var(--paper);border:2px solid var(--wire);z-index:1;transition:background .2s ease,border-color .2s ease}
+.fnode::before{top:-5px}
+.fnode::after{bottom:-5px}
+.fnode:hover{border-color:var(--stamp)}
+.fnode[open]{border-color:var(--stamp);box-shadow:0 2px 10px #0000000f}
+.fnode[open]::before,.fnode[open]::after{background:var(--stamp);border-color:var(--stamp)}
+.fnode.root{border-color:var(--ink);background:var(--stamp-soft)}
+.fnode.root::before{display:none}
+.fnode.root > .rootbody{padding:18px;display:flex;flex-direction:column;gap:9px}
+.fnode[data-path="side"]::before,.fnode[data-path="side"]::after{border-color:var(--ochre)}
+.fnode[data-path="side"][open]::before,.fnode[data-path="side"][open]::after{background:var(--ochre);border-color:var(--ochre)}
+.fnode[data-path="side"]:hover,.fnode[data-path="side"][open]{border-color:var(--ochre)}
+.fnode > summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:10px 14px;align-items:start}
+.fnode > summary::-webkit-details-marker{display:none}
+.fnode > summary > .col1{display:flex;flex-direction:column;gap:9px;min-width:0}
+.fnode .pid{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-3)}
+.fnode .claim{font-family:"Old Standard TT",Georgia,serif;font-size:clamp(19px,2.3vw,24px);font-weight:700;line-height:1.24}
+.fnode.root .claim{color:var(--stamp)}
+.chev{flex:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--rule);border-radius:8px;color:var(--ink-3);transition:transform .2s ease,color .2s ease,border-color .2s ease}
+.chev svg{width:16px;height:16px}
+.fnode[open] .chev{transform:rotate(180deg);color:var(--stamp);border-color:var(--stamp)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border:1px solid currentColor;border-radius:999px}
+.chip.s-strong{color:var(--stamp)}
+.chip.s-mixed{color:var(--ochre)}
+.chip.s-weak{color:var(--alarm)}
+.chip.ch{color:var(--ink-3)}
+.fnode .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--rule)}
+.fnode ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;color:var(--ink-2)}
+.deeper{border:1px solid var(--rule);border-radius:10px;background:var(--paper-2)}
+.deeper > summary{cursor:pointer;list-style:none;padding:12px 16px;min-height:44px;display:flex;align-items:center;gap:10px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.deeper > summary::-webkit-details-marker{display:none}
+.deeper > summary::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rule);flex:none}
+.deeper[open] > summary{color:var(--stamp);border-bottom:1px solid var(--rule)}
+.deeper[open] > summary::before{background:var(--stamp)}
+.deeper .inner{padding:16px;display:flex;flex-direction:column;gap:14px}
+.deeper blockquote{margin:0;font-family:"Old Standard TT",Georgia,serif;font-style:italic;font-size:17px;border-left:2px solid var(--stamp);padding-left:14px}
 
-  .topbar { display: none; }
-  .scrim { display: none; }
+/* ветка: подпорки и возражения под опорой */
+.fbranch{position:relative;margin-left:26px;padding-left:26px;padding-top:4px;display:flex;flex-direction:column}
+.fbranch::before{content:"";position:absolute;left:0;top:0;bottom:26px;width:2px;background:var(--wire)}
+.fbranch.contra::before{background:repeating-linear-gradient(to bottom,var(--alarm) 0 5px,transparent 5px 11px)}
+.fleaf{position:relative;margin-top:14px;border:1px solid var(--rule);border-radius:10px;background:var(--paper-2);padding:13px 16px;display:flex;flex-direction:column;gap:7px}
+.fleaf::before{content:"";position:absolute;left:-26px;top:24px;width:26px;height:2px;background:var(--wire)}
+.fleaf::after{content:"";position:absolute;left:-5px;top:19px;width:9px;height:9px;border-radius:50%;background:var(--paper);border:2px solid var(--wire)}
+.fbranch.contra .fleaf{border-style:dashed;border-color:var(--alarm)}
+.fbranch.contra .fleaf::before{background:repeating-linear-gradient(to right,var(--alarm) 0 5px,transparent 5px 11px)}
+.fbranch.contra .fleaf::after{border-color:var(--alarm)}
+.fleaf .lid{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.fbranch.contra .fleaf .lid{color:var(--alarm)}
+.fleaf .lclaim{font-size:16px;color:var(--ink);font-weight:600;line-height:1.35}
+.fleaf .lev{font-size:14.5px;color:var(--ink-2)}
+@media (max-width:640px){
+  .fbranch{margin-left:12px;padding-left:20px}
+  .fleaf::before{left:-20px;width:20px}
+  .fleaf::after{left:-4px}
+}
 
-  @media (max-width: 900px) {
-    .app { grid-template-columns: minmax(0, 1fr); }
-    .sidebar {
-      position: fixed; inset: 0 auto 0 0; width: min(84vw, 320px); height: 100dvh; z-index: 40;
-      transform: translateX(-102%); transition: transform 200ms ease; box-shadow: var(--shadow);
-    }
-    .app.open .sidebar { transform: none; }
-    .scrim { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .42); z-index: 30; }
-    .topbar {
-      display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20;
-      background: var(--ground); border-bottom: 1px solid var(--line); padding: 10px 14px;
-    }
-    .topbar .now {
-      font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted);
-    }
-    .burger {
-      appearance: none; background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
-      width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; color: var(--ink);
-      transition: border-color 160ms ease;
-    }
-    .burger:hover { border-color: var(--accent); }
-    .burger svg { width: 18px; height: 18px; }
-    .page { padding: 0 18px 96px; }
-    header.masthead { padding-top: 26px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+/* режим «несущий путь» */
+.flow.only-main .fnode[data-path="side"],
+.flow.only-main .fedge.sec{opacity:.34}
+.flow.only-main .fnode[data-path="side"] .claim{color:var(--ink-3)}
 
-  header.masthead { padding: 40px 0 26px; border-bottom: 1px solid var(--line); display: grid; gap: 14px; }
-  .kicker {
-    font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .15em;
-    text-transform: uppercase; color: var(--faint);
-  }
-  h1 {
-    font-family: var(--display); font-weight: 400; font-size: var(--s-2xl);
-    line-height: 1.02; margin: 0; letter-spacing: -.02em;
-    text-wrap: balance; overflow-wrap: break-word;
-  }
-  h1 .sub {
-    display: block; font-size: clamp(.95rem, .88rem + .3vw, 1.15rem);
-    color: var(--muted); font-style: italic; margin-top: .45em; letter-spacing: 0; line-height: 1.4;
-  }
-  .thesis { font-family: var(--display); font-size: var(--s-lg); line-height: 1.5; max-width: 58ch; margin: 0; }
-  .metaline {
-    display: flex; flex-wrap: wrap; gap: 6px 20px;
-    font-family: var(--mono); font-size: var(--s-xs); color: var(--muted);
-    letter-spacing: .03em; font-variant-numeric: tabular-nums;
-  }
-  .metaline b { color: var(--ink); font-weight: 600; }
+/* ---------- таблица ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:14.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--paper-2)}
+td.id{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--stamp);white-space:nowrap}
+tr.sup td{color:var(--ink-2)}
+tr.sup td.id{color:var(--ink-3)}
+[hidden]{display:none!important}
 
-  .view { display: none; padding-top: 34px; }
-  .view.active { display: block; animation: rise .18s ease-out; }
-  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
+/* ---------- цитаты ---------- */
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.q{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.q blockquote{margin:0;font-family:"Old Standard TT",Georgia,serif;font-size:18.5px;line-height:1.42}
+.q .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3)}
+.q .why{font-size:14px;color:var(--ink-2)}
+.copy{background:none;border:1px solid var(--rule);border-radius:6px;color:var(--ink-3);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;min-height:36px;cursor:pointer;flex:none;transition:border-color .18s ease,color .18s ease}
+.copy:hover{border-color:var(--stamp);color:var(--stamp)}
+@media (hover:none){.copy{min-height:44px}}
+.q.suspect{border-left:3px solid var(--alarm)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.tabs button{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;min-height:40px;padding:0 14px;border:1px solid var(--rule);border-radius:8px;background:none;color:var(--ink-2);cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.tabs button:hover{border-color:var(--stamp);color:var(--stamp)}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-  .view > h2 {
-    font-family: var(--display); font-weight: 400; font-size: var(--s-xl);
-    margin: 0 0 8px; letter-spacing: -.012em; line-height: 1.15;
-    text-wrap: balance; overflow-wrap: break-word;
-  }
-  .lede { color: var(--muted); max-width: 62ch; margin: 0 0 30px; font-size: var(--s-md); }
-  h3 {
-    font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .13em;
-    text-transform: uppercase; color: var(--faint); margin: 40px 0 14px; font-weight: 600;
-  }
-  h4 { font-family: var(--display); font-weight: 400; font-size: var(--s-lg); margin: 24px 0 10px; line-height: 1.25; }
-  p { max-width: 66ch; }
+/* ---------- рецепция и разбор ---------- */
+.critic{border-top:1px solid var(--rule);padding:20px 0;display:flex;flex-direction:column;gap:9px}
+.critic .src{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.06em;color:var(--ink-3)}
+.critic h4{font-family:"Old Standard TT",Georgia,serif;font-size:20px;font-weight:700}
+.verdict{background:var(--stamp-soft);border:1px solid var(--stamp);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
+.verdict h3{color:var(--stamp)}
+.acc{border:1px solid var(--rule);border-radius:10px;background:var(--card);margin-bottom:10px}
+.acc > summary{cursor:pointer;list-style:none;padding:15px 20px;min-height:52px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.acc > summary::-webkit-details-marker{display:none}
+.acc > summary::after{content:"+";font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--ink-3);flex:none}
+.acc[open] > summary::after{content:"–"}
+.acc .inner{padding:0 20px 20px;color:var(--ink-2);display:flex;flex-direction:column;gap:12px}
+.acc .inner ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px}
 
-  .card {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 20px 22px; box-shadow: var(--shadow);
-  }
-  .stack { display: grid; gap: 14px; }
-  .cols { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); }
+/* ---------- повторение ---------- */
+.deck{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:18px;min-height:280px}
+.deck .meta{display:flex;justify-content:space-between;gap:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.deck .front{font-family:"Old Standard TT",Georgia,serif;font-size:clamp(20px,2.6vw,27px);line-height:1.3}
+.deck .back{color:var(--ink-2);font-size:16.5px}
+.deck .back[hidden]{display:none}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+button.act{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;min-height:44px;padding:0 18px;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:var(--paper);cursor:pointer;transition:opacity .18s ease,border-color .18s ease,color .18s ease}
+button.act:hover{opacity:.86}
+button.act.ghost{background:none;color:var(--ink-2);border-color:var(--rule)}
+button.act.ghost:hover{border-color:var(--stamp);color:var(--stamp);opacity:1}
+.progress{height:3px;background:var(--rule);position:relative;border-radius:2px;overflow:hidden}
+.progress i{position:absolute;inset:0 auto 0 0;background:var(--stamp);width:0;transition:width .2s ease}
+.score{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.missed{display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--ink-2)}
+.modeswitch{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.modeswitch button{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;min-height:40px;padding:0 14px;border:1px solid var(--rule);border-radius:8px;background:none;color:var(--ink-2);cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.modeswitch button:hover{border-color:var(--stamp);color:var(--stamp)}
+.modeswitch button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-  .ref { font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .04em; color: var(--faint); white-space: nowrap; }
-  .tag {
-    display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
-    font-size: var(--s-xs); letter-spacing: .05em; text-transform: uppercase;
-    padding: 2px 7px; border-radius: 2px; border: 1px solid var(--line);
-    color: var(--muted); background: var(--panel-2); white-space: nowrap;
-  }
-  .tag.book { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
-  .tag.analysis { border-color: var(--steel); color: var(--steel); background: var(--steel-wash); }
-  .tag.strong { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
-  .tag.mixed { border-color: var(--line); color: var(--muted); }
-  .tag.thin { border-color: var(--steel); color: var(--steel); background: var(--steel-wash); }
+/* ---------- применение ---------- */
+.todo{display:flex;flex-direction:column}
+.todo label{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--rule);cursor:pointer;color:var(--ink-2);min-height:52px}
+.todo input{margin-top:5px;accent-color:var(--stamp);width:18px;height:18px;flex:none}
+.todo label:has(input:checked){color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--rule)}
 
-  blockquote { margin: 0; font-family: var(--display); font-size: var(--s-lg); line-height: 1.5; max-width: 56ch; }
-
-  .scroller {
-    overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius);
-    background: var(--panel); max-width: 100%;
-  }
-  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: var(--s-sm); }
-  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
-  th {
-    font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .08em; text-transform: uppercase;
-    color: var(--faint); background: var(--panel-2); border-bottom: 1px solid var(--line);
-    position: sticky; top: 0;
-  }
-  td.id { font-family: var(--mono); font-size: var(--s-sm); color: var(--accent-ink); white-space: nowrap; }
-  tr:last-child td { border-bottom: 0; }
-
-  .part {
-    background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
-    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
-  }
-  .part > summary {
-    list-style: none; cursor: pointer; padding: 16px 20px; display: flex;
-    justify-content: space-between; gap: 14px; align-items: baseline; flex-wrap: wrap;
-    transition: background 160ms ease;
-  }
-  .part > summary::-webkit-details-marker { display: none; }
-  .part > summary:hover { background: var(--panel-2); }
-  .part .ptitle { font-family: var(--display); font-size: var(--s-lg); line-height: 1.25; }
-  .part .pbody { padding: 0 20px 18px; display: grid; gap: 15px; }
-  .ch { display: grid; gap: 4px; max-width: 68ch; }
-  .ch .chead {
-    font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .09em;
-    color: var(--accent-ink); text-transform: uppercase;
-  }
-
-  .pillar {
-    background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
-    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
-  }
-  .pillar > summary {
-    list-style: none; cursor: pointer; padding: 18px 22px;
-    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline;
-    transition: background 160ms ease;
-  }
-  .pillar > summary::-webkit-details-marker { display: none; }
-  .pillar > summary:hover { background: var(--panel-2); }
-  .pid { font-family: var(--mono); font-size: var(--s-sm); color: var(--accent-ink); letter-spacing: .05em; }
-  .ptitle2 { font-family: var(--display); font-size: var(--s-lg); line-height: 1.32; text-wrap: balance; }
-  .pmeta { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .pbody2 { padding: 0 22px 20px; display: grid; gap: 16px; }
-  .pbody2 ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; max-width: 62ch; }
-  .pbody2 li::marker { color: var(--accent); }
-  details.inner { border-top: 1px solid var(--line-soft); padding-top: 14px; }
-  details.inner > summary {
-    cursor: pointer; font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .09em;
-    text-transform: uppercase; color: var(--accent-ink); list-style: none;
-  }
-  details.inner > summary::-webkit-details-marker { display: none; }
-  details.inner > summary::before { content: "+ "; }
-  details.inner[open] > summary::before { content: "− "; }
-  details.inner .inner-body { padding-top: 12px; display: grid; gap: 14px; }
-
-  .quote {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 18px 20px; display: grid; gap: 12px; box-shadow: var(--shadow);
-  }
-  .quote.load { border-left: 3px solid var(--accent); }
-  .quote.sharp { border-left: 3px solid var(--faint); }
-  .quote.suspect { border-left: 3px solid var(--steel); }
-  .qfoot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
-  .why { font-size: var(--s-md); color: var(--muted); max-width: 58ch; }
-  .copy {
-    appearance: none; background: none; border: 1px solid var(--line); border-radius: 2px;
-    color: var(--muted); font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .06em;
-    text-transform: uppercase; padding: 6px 10px; cursor: pointer; min-height: 30px;
-    transition: border-color 160ms ease, color 160ms ease;
-  }
-  .copy:hover { border-color: var(--accent); color: var(--accent-ink); }
-
-  .scene { display: grid; gap: 12px; }
-  .scene .stitle { font-family: var(--display); font-size: var(--s-lg); line-height: 1.3; }
-
-  .modeswitch { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
-  .modeswitch button, .btn {
-    appearance: none; background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
-    color: var(--ink); font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .07em;
-    text-transform: uppercase; padding: 10px 14px; cursor: pointer; min-height: 40px;
-    transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
-  }
-  .modeswitch button[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--accent-ink); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fbfbfa; }
-  .btn:hover, .modeswitch button:hover { border-color: var(--accent); }
-
-  .deck { display: grid; gap: 14px; }
-  .fcard {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    box-shadow: var(--shadow); padding: 18px 20px; display: grid; gap: 12px;
-  }
-  .fcard .front { font-family: var(--display); font-size: var(--s-lg); line-height: 1.42; max-width: 60ch; }
-  .fcard .back { display: none; border-top: 1px solid var(--line-soft); padding-top: 13px; max-width: 64ch; }
-  .fcard.open .back { display: block; }
-  .fcard .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .grade { display: flex; gap: 8px; }
-  .fcard.got { border-left: 3px solid var(--accent); }
-  .fcard.missed { border-left: 3px solid var(--steel); }
-
-  .quizhead { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; margin-bottom: 14px; }
-  .counter {
-    font-family: var(--mono); font-size: var(--s-sm); color: var(--faint);
-    letter-spacing: .05em; font-variant-numeric: tabular-nums;
-  }
-  .progress { height: 3px; background: var(--line-soft); border-radius: 2px; overflow: hidden; margin-bottom: 22px; }
-  .progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width 250ms ease; }
-  @media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
-  textarea {
-    width: 100%; min-height: 92px; background: var(--panel-2); border: 1px solid var(--line);
-    border-radius: 3px; color: var(--ink); font-family: var(--body); font-size: var(--s-base);
-    padding: 12px 14px; resize: vertical; line-height: 1.55;
-  }
-  .score { font-family: var(--display); font-size: 2.4rem; font-variant-numeric: tabular-nums; }
-
-  .checks { display: grid; gap: 10px; max-width: 64ch; }
-  .checks label {
-    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start;
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 13px 16px; cursor: pointer; min-height: 44px;
-    transition: border-color 160ms ease;
-  }
-  .checks label:hover { border-color: var(--accent); }
-  .checks input { margin-top: 5px; accent-color: var(--accent); width: 17px; height: 17px; }
-  .checks input:checked + span { color: var(--faint); text-decoration: line-through; }
-
-  ol.drill { max-width: 64ch; display: grid; gap: 12px; padding-left: 22px; }
-  ol.drill li::marker { font-family: var(--mono); color: var(--accent); font-size: var(--s-sm); }
-
-  .timeline { display: grid; max-width: 68ch; }
-  .tl-row {
-    display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 16px;
-    padding: 11px 0; border-bottom: 1px solid var(--line-soft);
-  }
-  .tl-row .when { font-family: var(--mono); font-size: var(--s-sm); color: var(--accent-ink); letter-spacing: .03em; }
-
-  footer.foot {
-    margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line);
-    color: var(--faint); font-family: var(--mono); font-size: var(--s-xs); letter-spacing: .04em;
-    display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between;
-  }
-
-  @media (max-width: 620px) {
-    .pillar > summary { grid-template-columns: 1fr; }
-    .pmeta { grid-column: 1; }
-    .tl-row { grid-template-columns: 1fr; gap: 2px; }
-  }
+footer{padding:44px 0 64px;color:var(--ink-3);font-size:14px}
+footer .wrap{display:flex;flex-direction:column;gap:12px;max-width:74ch}
+footer a{color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
-<div class="app" lang="ru" id="app">
-  <aside class="sidebar" id="sidebar" aria-label="Разделы пака">
-    <div class="brand">
-      <div class="brand-title">{{BRAND_TITLE}}</div>
-      <div class="brand-sub">{{BRAND_SUB}}</div>
-    </div>
-    <nav class="nav" id="rail"></nav>
-    <div class="side-foot">{{SIDE_FOOT}}</div>
-  </aside>
-  <div class="scrim" id="scrim" hidden></div>
-  <main class="main" id="main">
-    <div class="topbar">
-      <button class="burger" id="burger" type="button" aria-label="Открыть разделы" aria-expanded="false" aria-controls="sidebar">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-          <path d="M3 5h14M3 10h14M3 15h14"/>
-        </svg>
-      </button>
-      <span class="now" id="nowLabel">О чём книга</span>
-    </div>
-    <div class="page">
-  <header class="masthead">
-        <div class="kicker">{{KICKER}}</div>
-        <h1>{{H1}}
-          <span class="sub">{{H1_SUB}}</span>
-        </h1>
-        <p class="thesis">{{THESIS}}</p>
-        <div class="metaline">{{METALINE}}</div>
-      </header>
+<a class="skip" href="#content">Перейти к содержанию</a>
 
-
-  <!-- ============ ОБЗОР ============ -->
-  <section class="view" id="about" aria-labelledby="about-h">
-        <h2 id="about-h">{{H2_ABOUT}}</h2>
-        <p class="lede">{{LEDE_ABOUT}}</p>
-        <!-- Обзор: мир и завязка, что происходит дальше, чем кончается, кому читать оригинал. Компоненты: .stack > .card с h4 + p. -->
-{{VIEW_ABOUT}}
-      </section>
-
-  <!-- ============ ПЕРСОНАЖИ И МИР ============ -->
-  <section class="view" id="world" aria-labelledby="world-h">
-        <h2 id="world-h">{{H2_WORLD}}</h2>
-        <p class="lede">{{LEDE_WORLD}}</p>
-        <!-- Кто есть кто и устройство мира. Компоненты: .stack > .card, списки терминов. -->
-{{VIEW_WORLD}}
-      </section>
-
-  <!-- ============ ПЕРЕСКАЗ ============ -->
-  <section class="view" id="plot" aria-labelledby="plot-h">
-        <h2 id="plot-h">{{H2_PLOT}}</h2>
-        <p class="lede">{{LEDE_PLOT}}</p>
-        <!-- Последовательный пересказ по главам. Компоненты: .stack > .card (заголовок главы + плотный абзац). -->
-{{VIEW_PLOT}}
-      </section>
-
-  <!-- ============ СЦЕНЫ ============ -->
-  <section class="view" id="scenes" aria-labelledby="scenes-h">
-        <h2 id="scenes-h">{{H2_SCENES}}</h2>
-        <p class="lede">{{LEDE_SCENES}}</p>
-        <!-- Ключевые сцены и хронология. Компоненты: .card.scene > .stitle + span.ref + p + blockquote; .timeline > .tl-row > span.when + span. -->
-{{VIEW_SCENES}}
-      </section>
-
-  <!-- ============ СТЕРЖЕНЬ ============ -->
-  <section class="view" id="spine" aria-labelledby="spine-h">
-        <h2 id="spine-h">{{H2_SPINE}}</h2>
-        <p class="lede">{{LEDE_SPINE}}</p>
-        <!-- Тезис и опоры. Компоненты: details.pillar > summary(.pid .ptitle2 .pmeta span.tag) + .pbody2 > ul li + details.inner > .inner-body > blockquote + p.why. -->
-{{VIEW_SPINE}}
-      </section>
-
-  <!-- ============ КАРТА ============ -->
-  <section class="view" id="map" aria-labelledby="map-h">
-        <h2 id="map-h">{{H2_MAP}}</h2>
-        <p class="lede">{{LEDE_MAP}}</p>
-        <!-- Карта аргументации. Компоненты: .scroller > table с td.id и span.tag.strong|mixed|thin; ниже .stack > .card с выводами о несущих и слабых звеньях. -->
-{{VIEW_MAP}}
-      </section>
-
-  <!-- ============ ЦИТАТЫ ============ -->
-  <section class="view" id="quotes" aria-labelledby="quotes-h">
-        <h2 id="quotes-h">{{H2_QUOTES}}</h2>
-        <p class="lede">{{LEDE_QUOTES}}</p>
-        <div class="card" style="border-left:3px solid var(--steel); margin-bottom:24px">{{QUOTES_SOURCE_NOTE}}</div>
-        <h3>{{QUOTES_H_LOAD}}</h3>
-        <div class="stack" id="q-load"></div>
-        <h3>{{QUOTES_H_SHARP}}</h3>
-        <div class="stack" id="q-sharp"></div>
-        <h3>{{QUOTES_H_SUSPECT}}</h3>
-        <div class="stack" id="q-suspect"></div>
-      </section>
-
-  <!-- ============ РАЗБОР ============ -->
-  <section class="view" id="critique" aria-labelledby="critique-h">
-        <h2 id="critique-h">{{H2_CRITIQUE}}</h2>
-        <p class="lede">{{LEDE_CRITIQUE}}</p>
-        <!-- Разбор: что должно быть верно для опровержения, аудит свидетельств, противоречия, о чём молчит, приговор. Компоненты: .stack > .card, span.tag.analysis. -->
-{{VIEW_CRITIQUE}}
-      </section>
-
-  <!-- ============ РЕЦЕПЦИЯ ============ -->
-  <section class="view" id="reception" aria-labelledby="reception-h">
-        <h2 id="reception-h">{{H2_RECEPTION}}</h2>
-        <p class="lede">{{LEDE_RECEPTION}}</p>
-        <!-- Что говорили критики: имя, издание, дата, позиция, наш разбор попадания. Компоненты: .stack > .card; в конце .card со списком источников. -->
-{{VIEW_RECEPTION}}
-      </section>
-
-  <!-- ============ ПРОВЕРКА ============ -->
-  <section class="view" id="cards" aria-labelledby="cards-h">
-    <h2 id="cards-h">{{H2_CARDS}}</h2>
-    <p class="lede">{{LEDE_CARDS}}</p>
-
-    <div class="modeswitch" role="group" aria-label="Режим проверки">
-      <button id="mode-flip" aria-pressed="true">{{CARDS_MODE_ALL}}</button>
-      <button id="mode-quiz" aria-pressed="false">{{CARDS_MODE_QUIZ}}</button>
-      <button class="btn" id="reset-progress">Сбросить прогресс</button>
-    </div>
-
-    <div id="flipwrap"><div class="deck" id="deck"></div></div>
-
-    <div id="quizwrap" hidden>
-      <div class="quizhead">
-        <span class="counter" id="qcounter">Карточка 1 из 10</span>
-        <span class="counter" id="qtags"></span>
-      </div>
-      <div class="progress"><i id="qbar"></i></div>
-      <div class="fcard" id="quizcard">
-        <div class="front" id="qfront"></div>
-        <textarea id="qanswer" placeholder="Напишите ответ до того, как откроете." aria-label="Ваш ответ"></textarea>
-        <div class="back" id="qback"></div>
-        <div class="row">
-          <button class="btn primary" id="qreveal">Открыть</button>
-          <span class="grade" id="qgrade" hidden>
-            <button class="btn" data-g="got">Знал</button>
-            <button class="btn" data-g="missed">Не знал</button>
-          </span>
-        </div>
-      </div>
-      <div class="card" id="qresult" hidden style="margin-top:20px"></div>
-    </div>
-  </section>
-
-  <!-- ============ УПРАЖНЕНИЯ ============ -->
-  <section class="view" id="drills" aria-labelledby="drills-h">
-        <h2 id="drills-h">{{H2_DRILLS}}</h2>
-        <p class="lede">{{LEDE_DRILLS}}</p>
-        <!-- три блока ol.drill: свободное воспроизведение, разработка «почему так», перенос -->
-{{VIEW_DRILLS}}
-        <h3>{{DRILLS_H_SCHEDULE}}</h3>
-        <div class="checks" id="schedule"></div>
-        <h3>{{DRILLS_H_MISSES}}</h3>
-        <div class="card" id="misslog">{{DRILLS_MISSLOG_EMPTY}}</div>
-      </section>
-
-  <!-- ============ ПРИМЕНЕНИЕ ============ -->
-  <section class="view" id="apply" aria-labelledby="apply-h">
-        <h2 id="apply-h">{{H2_APPLY}}</h2>
-        <p class="lede">{{LEDE_APPLY}}</p>
-        <h3>{{APPLY_H_POSITIONS}}</h3>
-        <div class="checks" id="positions"></div>
-        <!-- дальше: опыты на неделю и «что перестать делать», .stack > .card -->
-{{VIEW_APPLY}}
-      </section>
-
-  <!-- ============ МЕТОД ============ -->
-  <section class="view" id="method" aria-labelledby="method-h">
-        <h2 id="method-h">{{H2_METHOD}}</h2>
-        <p class="lede">{{LEDE_METHOD}}</p>
-        <!-- Метод и охват: глубина, что прочитано, что не читалось, как собрано, как проверялись цитаты, чего в паке нет. Компоненты: .card, .cols, .scroller > table. -->
-{{VIEW_METHOD}}
-      </section>
-
-  <footer class="foot">
-    <span>1984 · Джордж Оруэлл · русское издание из библиотеки</span>
-    <span>глубокий проход · 28/29 файлов · 40 карточек · 26 цитат · рецепция по источникам</span>
-  </footer>
-    </div>
-  </main>
+<div class="topbar">
+  <button class="iconbtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidenav" aria-label="{{UI_MENU_OPEN}}">
+    <svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    <svg class="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <span class="tt"><b>{{TOPBAR_TITLE}}</b><i>{{TOPBAR_SUB}}</i></span>
+  <button class="iconbtn theme" id="themeBtn" type="button" aria-label="{{UI_THEME}}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <span class="lbl">{{UI_THEME}}</span>
+  </button>
 </div>
 
+<nav class="sidenav" id="sidenav" aria-label="{{UI_NAV_LABEL}}">
+  <div class="head"><b>{{SIDE_TITLE}}</b><span>{{SIDE_SUB}}</span></div>
+  <ol class="sidelist">
+{{NAV_ITEMS}}
+  </ol>
+  <div class="foot">{{SIDE_FOOT}}</div>
+</nav>
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="shell" id="content">
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="tag">{{KICKER}}</div>
+    <h1 class="title">{{H1}}</h1>
+    <p class="subtitle">{{SUBTITLE}}</p>
+    <div class="byline">{{BYLINE}}</div>
+    <p class="thesis">{{THESIS}}</p>
+    <div class="ledger">{{LEDGER}}</div>
+    <p class="note">{{METALINE}}</p>
+  </div>
+</header>
+
+<section id="pereskaz">
+  <div class="wrap">
+{{SECHEAD_1}}
+{{VIEW_PERESKAZ}}
+  </div>
+</section>
+
+<section id="lestnica">
+  <div class="wrap">
+{{SECHEAD_2}}
+    <div class="flowbox" data-flow>
+    <div class="flowbar">
+      <div class="sw" role="group" aria-label="{{UI_PATHS}}">
+        <button type="button" data-mode="all" aria-pressed="true">{{UI_PATH_ALL}}</button>
+        <button type="button" data-mode="main" aria-pressed="false">{{UI_PATH_MAIN}}</button>
+      </div>
+      <button class="iconbtn" type="button" data-expand data-state="closed" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="lbl">{{UI_EXPAND}}</span>
+      </button>
+      <p class="legend"><span><i></i>{{UI_LEG_MAIN}}</span><span><i class="sec"></i>{{UI_LEG_SIDE}}</span></p>
+    </div>
+      <p class="flownote">{{FLOW_NOTE_SPINE}}</p>
+      <div class="flow" id="flowSpine">
+{{FLOW_SPINE}}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="karta">
+  <div class="wrap">
+{{SECHEAD_3}}
+    <div class="flowbox" data-flow data-viewswitch>
+    <div class="flowbar">
+      <div class="sw" role="group" aria-label="{{UI_VIEWS}}">
+        <button type="button" data-view="graph" aria-pressed="true">{{UI_VIEW_GRAPH}}</button>
+        <button type="button" data-view="table" aria-pressed="false">{{UI_VIEW_TABLE}}</button>
+      </div>
+      <button class="iconbtn" type="button" data-expand data-state="closed" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="lbl">{{UI_EXPAND}}</span>
+      </button>
+      <p class="legend"><span><i></i>{{UI_LEG_SUP}}</span><span><i class="contra"></i>{{UI_LEG_CONTRA}}</span></p>
+    </div>
+      <div data-panel="graph">
+      <p class="flownote">{{FLOW_NOTE_MAP}}</p>
+      <div class="flow" id="flowMap">
+{{FLOW_MAP}}
+      </div>
+      </div>
+      <div data-panel="table" hidden>
+        <div class="tablewrap">{{MAP_TABLE}}</div>
+      </div>
+    </div>
+{{MAP_NOTES}}
+  </div>
+</section>
+
+<section id="citaty">
+  <div class="wrap">
+{{SECHEAD_4}}
+    <div class="tabs" role="group" aria-label="{{UI_TIERS}}">
+      <button type="button" aria-pressed="true" data-tier="all">{{UI_TIER_ALL}}</button>
+      <button type="button" aria-pressed="false" data-tier="core">{{UI_TIER_CORE}}</button>
+      <button type="button" aria-pressed="false" data-tier="sharp">{{UI_TIER_SHARP}}</button>
+      <button type="button" aria-pressed="false" data-tier="suspect">{{UI_TIER_SUSPECT}}</button>
+    </div>
+    <div class="qgrid" id="qgrid">
+{{QUOTES}}
+    </div>
+  </div>
+</section>
+
+<section id="kritiki">
+  <div class="wrap">
+{{SECHEAD_5}}
+{{VIEW_KRITIKI}}
+  </div>
+</section>
+
+<section id="razbor">
+  <div class="wrap">
+{{SECHEAD_6}}
+{{VIEW_RAZBOR}}
+  </div>
+</section>
+
+<section id="povtorenie">
+  <div class="wrap">
+{{SECHEAD_7}}
+    <div class="modeswitch" role="group" aria-label="{{UI_MODES}}">
+      <button type="button" id="modeFlip" aria-pressed="true">{{UI_MODE_FLIP}}</button>
+      <button type="button" id="modeQuiz" aria-pressed="false">{{UI_MODE_QUIZ}}</button>
+      <button type="button" class="act ghost" id="resetBtn" style="margin-left:auto">{{UI_RESET}}</button>
+    </div>
+    <div class="progress"><i id="bar"></i></div>
+    <div class="deck" id="deck">
+      <div class="meta"><span id="deckPos"></span><span id="deckTag"></span></div>
+      <p class="front" id="front">{{UI_DECK_START}}</p>
+      <p class="back" id="back" hidden></p>
+      <div class="btns" id="controls">
+        <button class="act" id="startBtn" type="button">{{UI_START}}</button>
+      </div>
+    </div>
+{{VIEW_POVTORENIE_TAIL}}
+  </div>
+</section>
+
+<section id="primenenie">
+  <div class="wrap">
+{{SECHEAD_8}}
+{{VIEW_PRIMENENIE}}
+  </div>
+</section>
+
+<section id="svyazi">
+  <div class="wrap">
+{{SECHEAD_9}}
+{{VIEW_SVYAZI}}
+  </div>
+</section>
+
+<footer><div class="wrap">{{FOOTER}}</div></footer>
+
+</div>
+
+
 <script>
-(function () {
-  "use strict";
+const CARDS = {{CARDS_JSON}};
+const KEY = "{{STORE_KEY}}";
+const UI = {{UI_JSON}};
+const store = {
+  read(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } },
+  write(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+};
+let state = Object.assign({missed:{}, seen:0, todo:{}, theme:null, nav:null}, store.read());
+const save = () => store.write(state);
+const root = document.documentElement;
 
-  // Порядок и id разделов фиксированы для всех книг. Переводятся только подписи.
-  var VIEWS = [
-    ["about", "{{NAV_ABOUT}}"],
-    ["world", "{{NAV_WORLD}}"],
-    ["plot", "{{NAV_PLOT}}"],
-    ["scenes", "{{NAV_SCENES}}"],
-    ["spine", "{{NAV_SPINE}}"],
-    ["map", "{{NAV_MAP}}"],
-    ["quotes", "{{NAV_QUOTES}}"],
-    ["critique", "{{NAV_CRITIQUE}}"],
-    ["reception", "{{NAV_RECEPTION}}"],
-    ["cards", "{{NAV_CARDS}}"],
-    ["drills", "{{NAV_DRILLS}}"],
-    ["apply", "{{NAV_APPLY}}"],
-    ["method", "{{NAV_METHOD}}"]
-  ];
+/* --- тема --- */
+if (state.theme) root.setAttribute("data-theme", state.theme);
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const dark = root.getAttribute("data-theme") === "dark" ||
+    (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+  state.theme = dark ? "light" : "dark";
+  root.setAttribute("data-theme", state.theme);
+  save();
+});
 
-  var GROUPS = { 0: "{{GROUP_BOOK}}", 4: "{{GROUP_ANALYSIS}}", 9: "{{GROUP_WORK}}" };
-  var rail = document.getElementById("rail");
-  var app = document.getElementById("app");
-  var scrim = document.getElementById("scrim");
-  var burger = document.getElementById("burger");
-  var nowLabel = document.getElementById("nowLabel");
+/* --- боковое меню --- */
+const menuBtn = document.getElementById("menuBtn"),
+      sidenav = document.getElementById("sidenav"),
+      scrim = document.getElementById("scrim");
+const wide = () => matchMedia("(min-width:1120px)").matches;
+function setNav(open, remember){
+  root.classList.toggle("nav-open", open);
+  menuBtn.setAttribute("aria-expanded", String(open));
+  menuBtn.setAttribute("aria-label", open ? UI.navClose : UI.navOpen);
+  scrim.hidden = !open || wide();
+  if (remember && wide()){ state.nav = open ? 1 : 0; save(); }
+}
+setNav(wide() ? state.nav !== 0 : false, false);
+menuBtn.addEventListener("click", () => setNav(!root.classList.contains("nav-open"), true));
+scrim.addEventListener("click", () => { setNav(false, false); menuBtn.focus(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && root.classList.contains("nav-open") && !wide()){ setNav(false, false); menuBtn.focus(); }
+});
+sidenav.addEventListener("click", e => { if (e.target.closest("a") && !wide()) setNav(false, false); });
+addEventListener("resize", () => { scrim.hidden = !root.classList.contains("nav-open") || wide(); });
 
-  VIEWS.forEach(function (v, i) {
-    if (GROUPS[i]) {
-      var g = document.createElement("div");
-      g.className = "group";
-      g.textContent = GROUPS[i];
-      rail.appendChild(g);
+/* --- где мы сейчас --- */
+const links = Array.prototype.slice.call(document.querySelectorAll(".sidelist a"));
+const order = Array.prototype.slice.call(document.querySelectorAll("section[id]")).map(s => s.id);
+const visible = new Set();
+if ("IntersectionObserver" in window){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) visible.add(e.target.id); else visible.delete(e.target.id); });
+    const cur = order.filter(id => visible.has(id))[0];
+    links.forEach(a => {
+      if (cur && a.getAttribute("href") === "#" + cur) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+  }, {rootMargin: "-15% 0px -70% 0px"});
+  document.querySelectorAll("section[id]").forEach(s => io.observe(s));
+}
+
+/* --- схемы: пути, раскрытие, вид --- */
+document.querySelectorAll("[data-flow]").forEach(box => {
+  const flow = box.querySelector(".flow");
+  box.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
+    box.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    flow.classList.toggle("only-main", b.dataset.mode === "main");
+  }));
+  box.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+    box.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    box.querySelectorAll("[data-panel]").forEach(p => { p.hidden = p.dataset.panel !== b.dataset.view; });
+  }));
+  const exp = box.querySelector("[data-expand]");
+  if (exp) exp.addEventListener("click", () => {
+    const open = exp.dataset.state !== "open";
+    box.querySelectorAll("details.fnode").forEach(d => { d.open = open; });
+    exp.dataset.state = open ? "open" : "closed";
+    exp.setAttribute("aria-expanded", String(open));
+    exp.querySelector(".lbl").textContent = open ? UI.collapse : UI.expand;
+  });
+});
+
+/* --- цитаты --- */
+const grid = document.getElementById("qgrid");
+document.querySelectorAll(".tabs [data-tier]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabs [data-tier]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+    const t = btn.dataset.tier;
+    grid.querySelectorAll("article").forEach(a => {
+      a.hidden = !(t === "all" || a.dataset.tier === t);
+    });
+  });
+});
+grid.addEventListener("click", e => {
+  const b = e.target.closest(".copy");
+  if (!b) return;
+  const art = b.closest("article");
+  const text = art.querySelector("blockquote").textContent.trim() + " — " + art.querySelector(".foot span").textContent.trim();
+  const done = () => { b.textContent = UI.copied; setTimeout(() => { b.textContent = UI.copy; }, 1600); };
+  const fail = () => { b.textContent = UI.copyFail; setTimeout(() => { b.textContent = UI.copy; }, 1600); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fail); else fail();
+});
+
+/* --- колода --- */
+const front = document.getElementById("front"),
+      back = document.getElementById("back"),
+      pos = document.getElementById("deckPos"),
+      tagEl = document.getElementById("deckTag"),
+      controls = document.getElementById("controls"),
+      bar = document.getElementById("bar");
+let mode = "flip", queue = [], idx = -1, quizScore = 0, quizLog = [];
+
+function shuffle(a){ const r = a.slice(); for (let i = r.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+function buildFlip(){ queue = shuffle(CARDS.map((_, i) => i)); }
+function buildQuiz(){
+  const missed = CARDS.map((_, i) => i).filter(i => state.missed[i]);
+  const rest = shuffle(CARDS.map((_, i) => i).filter(i => !state.missed[i]));
+  queue = shuffle(missed).slice(0, 6).concat(rest).slice(0, 10);
+  quizScore = 0; quizLog = [];
+}
+function setButtons(html){ controls.innerHTML = html; }
+
+function render(){
+  if (idx >= queue.length){ finish(); return; }
+  const c = CARDS[queue[idx]];
+  front.textContent = c.q;
+  back.textContent = c.a;
+  back.hidden = true;
+  tagEl.textContent = c.t;
+  pos.textContent = (mode === "quiz" ? UI.question : UI.card) + " " + (idx + 1) + UI.of + queue.length;
+  bar.style.width = (idx / queue.length * 100) + "%";
+  setButtons('<button class="act" id="showBtn" type="button">' + UI.show + '</button>' +
+             '<button class="act ghost" id="skipBtn" type="button">' + UI.skip + '</button>');
+  document.getElementById("showBtn").addEventListener("click", reveal);
+  document.getElementById("skipBtn").addEventListener("click", () => { mark(false); });
+}
+function reveal(){
+  back.hidden = false;
+  setButtons('<button class="act" id="gotBtn" type="button">' + UI.knew + '</button>' +
+             '<button class="act ghost" id="missBtn" type="button">' + UI.missed + '</button>');
+  document.getElementById("gotBtn").addEventListener("click", () => mark(true));
+  document.getElementById("missBtn").addEventListener("click", () => mark(false));
+}
+function mark(ok){
+  const i = queue[idx];
+  if (ok){ delete state.missed[i]; quizScore++; }
+  else { state.missed[i] = true; quizLog.push(i); }
+  state.seen = (state.seen || 0) + 1;
+  save();
+  idx++; render();
+}
+function finish(){
+  bar.style.width = "100%";
+  pos.textContent = mode === "quiz" ? UI.quizDone : UI.roundDone;
+  tagEl.textContent = "";
+  back.hidden = true;
+  const missedCount = Object.keys(state.missed).length;
+  if (mode === "quiz"){
+    front.innerHTML = '<span class="score">' + quizScore + " / " + queue.length + "</span> — " + UI.correct;
+    let html = "";
+    if (quizLog.length){
+      html = '<div class="missed"><b>' + UI.missList + '</b>' +
+        quizLog.map(i => "<div>· " + CARDS[i].q + ' <span class="chip ch">' + CARDS[i].t + "</span></div>").join("") + "</div>";
+    } else {
+      html = '<div class="missed">' + UI.noMiss + "</div>";
     }
-    var b = document.createElement("button");
-    b.type = "button";
-    var n = document.createElement("span");
-    n.className = "n";
-    n.textContent = String(i + 1).padStart(2, "0");
-    var label = document.createElement("span");
-    label.className = "t";
-    label.textContent = v[1];
-    b.appendChild(n);
-    b.appendChild(label);
-    b.setAttribute("data-view", v[0]);
-    b.addEventListener("click", function () { location.hash = v[0]; });
-    rail.appendChild(b);
+    back.innerHTML = html; back.hidden = false;
+  } else {
+    front.textContent = UI.roundOver.replace("%d", missedCount);
+  }
+  setButtons('<button class="act" id="againBtn" type="button">' + UI.again + '</button>');
+  document.getElementById("againBtn").addEventListener("click", start);
+}
+function start(){
+  if (mode === "quiz") buildQuiz(); else buildFlip();
+  idx = 0; render();
+}
+document.getElementById("startBtn").addEventListener("click", start);
+document.getElementById("modeFlip").addEventListener("click", () => {
+  mode = "flip";
+  document.getElementById("modeFlip").setAttribute("aria-pressed", "true");
+  document.getElementById("modeQuiz").setAttribute("aria-pressed", "false");
+  start();
+});
+document.getElementById("modeQuiz").addEventListener("click", () => {
+  mode = "quiz";
+  document.getElementById("modeQuiz").setAttribute("aria-pressed", "true");
+  document.getElementById("modeFlip").setAttribute("aria-pressed", "false");
+  start();
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  state.missed = {}; state.seen = 0; save();
+  bar.style.width = "0";
+  pos.textContent = UI.card + " 1" + UI.of + CARDS.length;
+  tagEl.textContent = "";
+  front.textContent = UI.reset;
+  back.hidden = true;
+  setButtons('<button class="act" id="startBtn2" type="button">' + UI.start + '</button>');
+  document.getElementById("startBtn2").addEventListener("click", start);
+});
+pos.textContent = UI.card + " 1" + UI.of + CARDS.length;
+
+/* --- отметки в применении --- */
+document.querySelectorAll("[data-todo] input").forEach((box, i) => {
+  const key = "t" + i;
+  if (state.todo[key]) box.checked = true;
+  box.addEventListener("change", () => {
+    if (box.checked) state.todo[key] = 1; else delete state.todo[key];
+    save();
   });
-
-  function closeDrawer() {
-    app.classList.remove("open");
-    scrim.hidden = true;
-    burger.setAttribute("aria-expanded", "false");
-  }
-  burger.addEventListener("click", function () {
-    var open = app.classList.toggle("open");
-    scrim.hidden = !open;
-    burger.setAttribute("aria-expanded", open ? "true" : "false");
-  });
-  scrim.addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeDrawer();
-  });
-
-  function show(id) {
-    var target = VIEWS.some(function (v) { return v[0] === id; }) ? id : VIEWS[0][0];
-    VIEWS.forEach(function (v) {
-      document.getElementById(v[0]).classList.toggle("active", v[0] === target);
-    });
-    Array.prototype.forEach.call(rail.children, function (b) {
-      if (b.tagName !== "BUTTON") return;
-      b.setAttribute("aria-current", b.getAttribute("data-view") === target ? "true" : "false");
-    });
-    VIEWS.forEach(function (v) { if (v[0] === target) nowLabel.textContent = v[1]; });
-    window.scrollTo(0, 0);
-    closeDrawer();
-  }
-  window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
-
-  var QUOTES = {{QUOTES_JSON}};
-
-  function quoteNode(item) {
-    var wrap = document.createElement("div");
-    wrap.className = "quote " + item.t;
-    var bq = document.createElement("blockquote");
-    bq.textContent = "«" + item.q + "»";
-    var why = item.w ? document.createElement("div") : null;
-    if (why) { why.className = "why"; why.textContent = item.w; }
-    var foot = document.createElement("div");
-    foot.className = "qfoot";
-    var left = document.createElement("span");
-    left.className = "ref";
-    left.textContent = "— " + item.c + (item.p ? "  ·  " + item.p : "");
-    var btn = document.createElement("button");
-    btn.className = "copy";
-    btn.type = "button";
-    btn.textContent = "Копировать";
-    btn.addEventListener("click", function () {
-      navigator.clipboard.writeText("«" + item.q + "» — {{QUOTE_ATTRIB}}, " + item.c).then(function () {
-        btn.textContent = "Скопировано";
-        setTimeout(function () { btn.textContent = "Копировать"; }, 1400);
-      }, function () { btn.textContent = "Ctrl+C"; });
-    });
-    foot.appendChild(left);
-    foot.appendChild(btn);
-    wrap.appendChild(bq);
-    if (why) wrap.appendChild(why);
-    wrap.appendChild(foot);
-    return wrap;
-  }
-  QUOTES.forEach(function (item) { document.getElementById("q-" + item.t).appendChild(quoteNode(item)); });
-
-  var CARDS = {{CARDS_JSON}};
-
-  var STORE = "{{STORE_KEY}}";
-  var state = load();
-  function load() {
-    try { var raw = localStorage.getItem(STORE); return raw ? JSON.parse(raw) : { grades: {}, checks: {} }; }
-    catch (e) { return { grades: {}, checks: {} }; }
-  }
-  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
-
-  var deck = document.getElementById("deck");
-  function renderDeck() {
-    deck.textContent = "";
-    CARDS.forEach(function (c, i) {
-      var el = document.createElement("div");
-      el.className = "fcard" + (state.grades[i] ? " " + state.grades[i] : "");
-      var front = document.createElement("div");
-      front.className = "front";
-      front.textContent = c.q;
-      var tag = document.createElement("span");
-      tag.className = "ref";
-      tag.textContent = c.t;
-      var back = document.createElement("div");
-      back.className = "back";
-      back.textContent = c.a;
-      var row = document.createElement("div");
-      row.className = "row";
-      var reveal = document.createElement("button");
-      reveal.className = "btn";
-      reveal.type = "button";
-      reveal.textContent = "Открыть";
-      reveal.addEventListener("click", function () {
-        el.classList.toggle("open");
-        reveal.textContent = el.classList.contains("open") ? "Скрыть" : "Открыть";
-      });
-      var grade = document.createElement("span");
-      grade.className = "grade";
-      [["got", "Знал"], ["missed", "Не знал"]].forEach(function (pair) {
-        var b = document.createElement("button");
-        b.className = "btn";
-        b.type = "button";
-        b.textContent = pair[1];
-        b.addEventListener("click", function () {
-          state.grades[i] = pair[0]; save(); renderDeck(); renderMisses();
-        });
-        grade.appendChild(b);
-      });
-      row.appendChild(reveal); row.appendChild(grade);
-      el.appendChild(front); el.appendChild(tag); el.appendChild(back); el.appendChild(row);
-      deck.appendChild(el);
-    });
-  }
-  renderDeck();
-
-  var quizOrder = [], qi = 0, quizScore = 0;
-  var flipwrap = document.getElementById("flipwrap");
-  var quizwrap = document.getElementById("quizwrap");
-  var bFlip = document.getElementById("mode-flip");
-  var bQuiz = document.getElementById("mode-quiz");
-
-  function shuffle(a) {
-    var arr = a.slice();
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-    }
-    return arr;
-  }
-  function sample() {
-    var missed = [], rest = [];
-    CARDS.forEach(function (c, i) { (state.grades[i] === "missed" ? missed : rest).push(i); });
-    return missed.concat(shuffle(rest)).slice(0, 10);
-  }
-  function startQuiz() {
-    quizOrder = sample(); qi = 0; quizScore = 0;
-    document.getElementById("qresult").hidden = true;
-    document.getElementById("quizcard").hidden = false;
-    paintQuiz();
-  }
-  function paintQuiz() {
-    var c = CARDS[quizOrder[qi]];
-    document.getElementById("qcounter").textContent = "Карточка " + (qi + 1) + " из " + quizOrder.length;
-    document.getElementById("qtags").textContent = c.t;
-    document.getElementById("qfront").textContent = c.q;
-    document.getElementById("qback").textContent = c.a;
-    document.getElementById("quizcard").classList.remove("open");
-    document.getElementById("qanswer").value = "";
-    document.getElementById("qgrade").hidden = true;
-    document.getElementById("qreveal").hidden = false;
-    document.getElementById("qbar").style.width = (qi / quizOrder.length * 100) + "%";
-  }
-  document.getElementById("qreveal").addEventListener("click", function () {
-    document.getElementById("quizcard").classList.add("open");
-    this.hidden = true;
-    document.getElementById("qgrade").hidden = false;
-  });
-  Array.prototype.forEach.call(document.getElementById("qgrade").children, function (b) {
-    b.addEventListener("click", function () {
-      var g = b.getAttribute("data-g");
-      state.grades[quizOrder[qi]] = g;
-      if (g === "got") quizScore++;
-      save(); renderDeck(); renderMisses();
-      qi++;
-      if (qi >= quizOrder.length) { finishQuiz(); } else { paintQuiz(); }
-    });
-  });
-  function finishQuiz() {
-    document.getElementById("qbar").style.width = "100%";
-    document.getElementById("quizcard").hidden = true;
-    var box = document.getElementById("qresult");
-    box.hidden = false; box.textContent = "";
-    var s = document.createElement("div");
-    s.className = "score";
-    s.textContent = quizScore + " / " + quizOrder.length;
-    box.appendChild(s);
-    var missedNow = quizOrder.filter(function (i) { return state.grades[i] === "missed"; });
-    var p = document.createElement("p");
-    p.textContent = missedNow.length
-      ? "Промахи собраны ниже и пойдут первыми в следующем круге."
-      : "Круг чистый. Возвращайтесь через три дня — в память это превращает именно интервал.";
-    box.appendChild(p);
-    missedNow.forEach(function (i) {
-      var d = document.createElement("div");
-      d.style.marginTop = "10px";
-      var b = document.createElement("b"); b.textContent = CARDS[i].q;
-      var r = document.createElement("span"); r.className = "ref"; r.textContent = "  " + CARDS[i].t;
-      d.appendChild(b); d.appendChild(r); box.appendChild(d);
-    });
-    var again = document.createElement("button");
-    again.className = "btn primary"; again.type = "button";
-    again.style.marginTop = "18px"; again.textContent = "Ещё круг";
-    again.addEventListener("click", startQuiz);
-    box.appendChild(again);
-  }
-  bFlip.addEventListener("click", function () {
-    bFlip.setAttribute("aria-pressed", "true"); bQuiz.setAttribute("aria-pressed", "false");
-    flipwrap.hidden = false; quizwrap.hidden = true;
-  });
-  bQuiz.addEventListener("click", function () {
-    bQuiz.setAttribute("aria-pressed", "true"); bFlip.setAttribute("aria-pressed", "false");
-    flipwrap.hidden = true; quizwrap.hidden = false; startQuiz();
-  });
-  document.getElementById("reset-progress").addEventListener("click", function () {
-    state = { grades: {}, checks: {} }; save(); renderDeck(); renderMisses(); renderChecks();
-  });
-
-  function renderMisses() {
-    var box = document.getElementById("misslog");
-    var missed = CARDS.map(function (c, i) { return { c: c, i: i }; })
-      .filter(function (x) { return state.grades[x.i] === "missed"; });
-    box.textContent = "";
-    if (!missed.length) {
-      box.textContent = "Промахов пока нет. Пройдите опрос: всё, что отмечено «Не знал», собирается здесь и идёт первым в следующий раз.";
-      return;
-    }
-    missed.forEach(function (x, n) {
-      var d = document.createElement("div");
-      d.style.padding = n ? "12px 0 0" : "0";
-      var b = document.createElement("b"); b.textContent = x.c.q;
-      var r = document.createElement("div"); r.className = "ref"; r.textContent = x.c.t;
-      d.appendChild(b); d.appendChild(r); box.appendChild(d);
-    });
-  }
-  renderMisses();
-
-  var SCHEDULE = {{SCHEDULE_JSON}};
-  var POSITIONS = {{POSITIONS_JSON}};
-  function renderChecks() { fill("schedule", SCHEDULE, "sch"); fill("positions", POSITIONS, "pos"); }
-  function fill(id, items, prefix) {
-    var host = document.getElementById(id);
-    host.textContent = "";
-    items.forEach(function (text, i) {
-      var key = prefix + i;
-      var label = document.createElement("label");
-      var input = document.createElement("input");
-      input.type = "checkbox";
-      input.checked = !!state.checks[key];
-      input.addEventListener("change", function () { state.checks[key] = input.checked; save(); });
-      var span = document.createElement("span");
-      span.textContent = text;
-      label.appendChild(input); label.appendChild(span);
-      host.appendChild(label);
-    });
-  }
-  renderChecks();
-
-  show(location.hash.slice(1));
-})();
+});
 </script>

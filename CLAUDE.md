@@ -12,7 +12,7 @@ them at length.
 
 ```
 .claude/skills/book-distill/   the pipeline (see its SKILL.md)
-  reference/page-template.html the shared page shell — same structure for every book
+  reference/page-template.html the shared page skeleton — same sections for every new book
 CLAUDE.md  README.md           committed
 
 input/                         the drop zone — gitignored, emptied by ingest
@@ -47,14 +47,23 @@ library/<book-slug>/           one directory per book — gitignored, never comm
   found anywhere else in the tree is treated the same way. Never distill a book in place in
   `input/`, and never leave a copy behind there.
 
-- **Every page has the same structure.** `library/<slug>/page.html` is built from
-  `.claude/skills/book-distill/reference/page-template.html`: the same thirteen views in the same
-  order, the same components, the same JavaScript. Per book only the content, the depth and the
-  palette change. Never design a page layout per book.
+- **Every page has the same skeleton.** `library/<slug>/page.html` is built from
+  `.claude/skills/book-distill/reference/page-template.html`: one scroll, a collapsible left menu,
+  and the same nine sections in the same order — `pereskaz`, `lestnica`, `karta`, `citaty`,
+  `kritiki`, `razbor`, `povtorenie`, `primenenie`, `svyazi` — with the same components and the same
+  JavaScript. Per book only the content, the depth and the palette change. Never design a page
+  layout per book. `1984` and `frankenstein` predate the skeleton and keep their pages.
 
-- **The palette comes from the book's cover** — dominant colour to `--accent`, second colour to
-  `--steel`, neutrals biased toward the accent hue, contrast checked in both themes. That is the
-  one place a pack is allowed to look different from its neighbours.
+- **«Лестница опор» and «Карта» are node graphs, not lists.** Pillars are `<details>` nodes joined
+  by labelled edges: solid along the load-bearing chain, dashed to the side pillars and to
+  objections. Both graphs carry a path switch and an open-all button, and the map keeps the table
+  behind a «схема / таблица» switch. Markup and behaviour come from the template — never per book.
+
+- **The palette comes from the book's cover** — dominant colour to `--stamp`, second colour to
+  `--ochre`, neutrals biased toward the accent hue, contrast computed in both themes (text ≥4.5:1,
+  graph wires ≥3:1). Red is reserved for weak claims and objections, so a red cover yields the
+  accent to its second colour and `book.json` says why. That is the one place a pack is allowed to
+  look different from its neighbours.
 
 - **Pass 5 requires the `ui-ux-pro-max` skill.** Load it before touching the page; its
   pre-delivery checklist is the gate before publishing.

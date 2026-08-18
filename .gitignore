@@ -19,3 +19,6 @@ __pycache__/
 *.mobi
 *.azw3
 *.djvu
+
+# Claude Code session state.
+/.claude/state/

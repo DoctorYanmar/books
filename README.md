@@ -38,25 +38,37 @@ carries the pipeline and nothing else.
 | `drills.md` | Free-recall prompts, "why is this true?" questions, spaced schedule |
 | `apply.md` | Decisions and experiments the book implies |
 | `links.md` | How this book agrees with / contradicts the others in your library |
-| `page.html` | Interactive page: thirteen views from retelling to deck, same structure for every book |
+| `page.html` | Interactive page: nine sections from retelling to deck, same skeleton for every book |
 
 ## The page
 
-Every book gets the same page: an app shell with a rail of thirteen views in a fixed order —
-**О чём книга · Кто есть кто · Пересказ · Сцены · Стержень · Карта · Цитаты · Разбор · Что
-говорили критики · Проверка · Упражнения · Применение · Метод**. The structure never changes from
-book to book, so the second pack reads like the first and you never hunt for a section. Depth
-changes how densely the views are filled; it never changes how many there are.
+Every book gets the same page: one scroll, a collapsible left menu, and nine sections in a fixed
+order — **Пересказ · Лестница опор · Карта · Цитаты · Критики · Разбор · Повторение · Применение ·
+Связи**. The skeleton never changes from book to book, so the second pack reads like the first and
+you never hunt for a section. Depth changes how densely the sections are filled; it never changes
+how many there are.
+
+Two of the nine are graphs rather than prose. **Лестница опор** draws the thesis as a root node and
+the pillars as nodes below it: solid edges run along the load-bearing chain, dashed ones lead to
+the side pillars the thesis survives without, and every edge is labelled with the step it makes. A
+switch dims everything off the main path. **Карта** gives each pillar a node holding a solid branch
+of supports and a dashed branch of objections, each objection labelled with the claim it attacks;
+the dense table is still there behind a switch. Nodes are plain `<details>` elements in normal
+document flow — keyboard and deep links work, and nothing can overlap at any width.
 
 What *is* per book is the colour: the palette is taken from that edition's cover — dominant colour
-becomes the accent, the type colour becomes the second accent, the neutrals get biased toward it.
-Two packs never look the same, and each looks like its book.
+becomes the accent, the second colour carries the side paths and the `[разбор]` marks, the neutrals
+get biased toward the accent hue. One reserved hue: red already means *weak claim* on this page, so
+a red cover gives up its accent to the cover's second colour, and `book.json` records why. Two packs
+never look the same, and each looks like its book.
 
-The shell lives in `.claude/skills/book-distill/reference/page-template.html` and is committed with
-the pipeline. Pass 5 fills its placeholders and runs the
+The skeleton lives in `.claude/skills/book-distill/reference/page-template.html` and is committed
+with the pipeline. Pass 5 fills its placeholders and runs the
 [`ui-ux-pro-max`](https://github.com/mrgoonie/ui-ux-pro-max-skill) skill, which is **required** for
 that pass — it carries the contrast, focus, touch-target and typography checks the page is held to,
 and its pre-delivery checklist gates publishing.
+
+`1984` and `frankenstein` were distilled before this skeleton existed and keep the pages they have.
 
 ## Why it is built this way
 
