@@ -1,5 +1,9 @@
 # books — learn a book without reading it
 
+A local pipeline that turns **a book you already own** into your own layered study material:
+a chapter-by-chapter retelling, an argument graph, verbatim quotes checked against the source,
+an adversarial critique, flashcards and a quiz — plus one interactive page to read it all in.
+
 Drop a book file (`.epub`, `.pdf`, `.fb2`, `.txt`, `.md`) into `input/` and ask Claude Code:
 
 ```
@@ -138,3 +142,27 @@ Both the book's own language and the pack's are recorded in `book.json`.
 python .claude/skills/book-distill/scripts/extract.py "library/book-slug/Book.epub"
 python .claude/skills/book-distill/scripts/make_cards.py library/book-slug/cards.md
 ```
+
+## Scope, and what this tool is not
+
+This repository contains the pipeline: Markdown instructions and Python scripts. It contains no
+books, no extracted text and no generated study packs, and it never will — `input/` and `library/`
+are gitignored in full, and the common ebook extensions are ignored anywhere in the tree.
+
+- **You supply the book.** Use a copy you lawfully own. The pipeline reads files you already have;
+  it does not download books, and it does not read, remove or work around DRM or any other access
+  control. A DRM-protected file simply will not parse.
+- **Everything it produces stays on your machine.** Packs quote books at length, which is exactly
+  why they are private study material and not something this repo publishes. If you choose to
+  publish a pack you built, that is your decision and your responsibility under the copyright law
+  that applies to you.
+- **It sends chapters to an AI assistant.** That is how the analysis is written. Check what your
+  provider's terms say about the content you submit and whether your account tier trains on it —
+  API and commercial tiers generally do not, consumer tiers may depend on a setting.
+- **The MIT license covers this repository's code and documentation only.** It grants no rights
+  whatsoever over any book the pipeline reads or any output it produces.
+
+## License
+
+[MIT](LICENSE). See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and
+[SECURITY.md](SECURITY.md) for reporting a vulnerability.
