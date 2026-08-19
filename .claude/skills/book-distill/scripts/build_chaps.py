@@ -13,12 +13,24 @@ import sys
 MD, PAGE = sys.argv[1], sys.argv[2]
 
 md = open(MD, encoding="utf-8").read()
-body = re.split(r"\n## ", md.split("## Пересказ", 1)[1])[0]
 
-EVIDENCE = "Чем держится"
-OPEN = "Что осталось открытым"
-NEXT = "Дальше"
-CLAIM = "Утверждение"
+# Slot labels are translated with the pack, so pick the set the retelling was written in.
+SLOTS = {
+    "ru": {"heading": "## Пересказ", "claim": "Утверждение", "evidence": "Чем держится",
+           "open": "Что осталось открытым", "next": "Дальше"},
+    "en": {"heading": "## Retelling", "claim": "Claim", "evidence": "What holds it up",
+           "open": "Left open", "next": "Next"},
+}
+lang = "ru" if SLOTS["ru"]["heading"] in md else "en"
+if SLOTS[lang]["heading"] not in md:
+    sys.exit(f"no retelling heading in {MD} — expected one of "
+             + ", ".join(repr(s["heading"]) for s in SLOTS.values()))
+body = re.split(r"\n## ", md.split(SLOTS[lang]["heading"], 1)[1])[0]
+
+EVIDENCE = SLOTS[lang]["evidence"]
+OPEN = SLOTS[lang]["open"]
+NEXT = SLOTS[lang]["next"]
+CLAIM = SLOTS[lang]["claim"]
 
 
 def esc(s):
@@ -78,6 +90,11 @@ for chunk in re.split(r"\n### ", body)[1:]:
     articles.append("\n".join(out))
 
 html = open(PAGE, encoding="utf-8").read()
+if '<div class="chaps">' not in html and "{{VIEW_PERESKAZ}}" in html:
+    # a page straight off the template: open the container the articles live in
+    html = html.replace("{{VIEW_PERESKAZ}}", '    <div class="chaps">\n    </div>')
+if '<div class="chaps">' not in html:
+    sys.exit(f'{PAGE} has neither <div class="chaps"> nor the {{{{VIEW_PERESKAZ}}}} slot')
 start = html.index('<div class="chaps">')
 open_tag_end = start + len('<div class="chaps">')
 end = html.index("\n    </div>", open_tag_end)

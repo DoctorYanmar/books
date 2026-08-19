@@ -79,6 +79,13 @@ library/<book-slug>/           one directory per book — gitignored, never comm
 - **Pass 5 requires the `ui-ux-pro-max` skill.** Load it before touching the page; its
   pre-delivery checklist is the gate before publishing.
 
+- **The main context never reads book text.** A big book fills it during the chapter passes and
+  every later pass then runs degraded. Chapters, notes and retelling blocks are written by one
+  subagent each, in waves, returning receipts instead of text; the run's working memory lives in
+  `library/<slug>/state/` (`recon.md`, `digest.md`, `retelling/`, `cold-read.md`). `notes_digest.py`
+  rolls the notes up into the digest that synthesis reads, and `build_retelling.py` stitches the
+  per-chapter blocks into `retelling.md`. Both files are generated — edit the parts, regenerate.
+
 - Invoke the `book-distill` skill for anything involving a book in this folder: distilling,
   quizzing, asking questions about one, or connecting several.
 - Book slugs are lowercase-hyphenated short titles: `library/antifragile/`, not

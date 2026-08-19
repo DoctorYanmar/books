@@ -50,6 +50,11 @@ library/<book-slug>/
   book.json          title, author, language, run log, depth, artifact URL, status
   source/            manifest.json, chapters/NNN-*.md, full.txt   (generated, do not edit)
   notes/NNN-*.md     per-chapter dense notes + quotes            (pass 2)
+  state/             the run's working memory, kept on disk and not in context
+    recon.md         provisional thesis + pillar candidates       (pass 1)
+    digest.md        every chapter's L1-L3 claims, generated      (pass 2)
+    retelling/       front.md, NNN-*.md blocks, tail.md           (pass 2.5)
+    cold-read.md     one line per chapter: pass, or what failed   (pass 2.6)
   spine.md           L1 + L2 ladder, 10-minute read              (pass 3)
   argument-map.md    claim -> evidence -> strength -> objection   (pass 3)
   quotes.md          verbatim, sourced, ranked                    (pass 3)
@@ -71,6 +76,39 @@ The interactive page is built from a shared template, not written from scratch:
   page-template.html   the page skeleton every new book uses: same sections, same components, same JS
   interactive.md       what each view holds, how the palette is derived, how to verify
 ```
+
+## Context budget — why the passes are shaped the way they are
+
+A 400-page book does not fit in the run's context, and the pipeline breaks in a specific way when
+you pretend it does: the chapter passes fill the main context with book text, and everything after
+them — retelling, synthesis, cards, page — runs on a context that is already full and starts
+degrading or compacting. The pack gets thinner exactly where the book is longest.
+
+So the run is split in two roles, and the split is not optional.
+
+**The orchestrator (this context) never reads book text.** Not `source/chapters/*`, not
+`source/full.txt`, not a whole file under `notes/`, not `retelling.md` end to end. What it may read:
+`source/manifest.json`, `state/*`, linter output, `book.json`, and single chapter blocks when it is
+repairing one flagged sentence.
+
+**Subagents read book text and write files.** Every chapter-sized piece of work is one subagent with
+one chapter's worth of input. It writes its output to disk and returns a receipt — never the text it
+just wrote. A subagent that returns its file has defeated the entire arrangement, so say so in the
+prompt: *write the file, then reply with at most N lines.*
+
+Between the two sits the working memory on disk, `state/`, which is small on purpose: `recon.md`
+carries the provisional thesis into every chapter agent, `digest.md` carries every chapter's claims
+back out. The orchestrator holds those two files; the book stays on disk.
+
+Three practical rules that come out of this:
+
+- **Fan out in waves of 4–6.** Every agent's receipt lands in this context, and so does every tool
+  call's own overhead. Waves keep that bounded and keep a bad prompt from being paid for forty times.
+- **Never put a linter loop inside a writing agent.** One write, then the caller runs the linter once,
+  then the caller sends back only what failed. The first version of this pipeline let each writer
+  iterate against the linter on its own: 3.2M tokens across 44 agents for eleven chapters.
+- **Nothing is written twice.** Chapter blocks are assembled by script, the page's chapter articles
+  are generated from the retelling, the digest is generated from the notes. Regenerate, never retype.
 
 ## Pipeline
 
@@ -114,22 +152,60 @@ files — say so instead of hallucinating content.
 
 ### Pass 1 — Recon (cheap, orients everything else)
 
-Read only: front matter, TOC, introduction, first chapter, last chapter, conclusion.
-Produce a **provisional** L1 thesis and candidate L2 pillars. Do not write files yet — hold this
-in context. It makes the chapter passes classify correctly instead of summarizing blindly.
+One subagent, not the orchestrator. It reads front matter, TOC, introduction, first chapter, last
+chapter and conclusion — five or six chapter files, which is already more book text than the main
+context should ever hold — and writes `state/recon.md`:
 
-### Pass 2 — Chapter passes
+- the **provisional** L1 thesis, one sentence;
+- 3–7 candidate L2 pillars, one line each, with the chapters each is expected to live in;
+- the book's own vocabulary: the terms it coins or redefines, one line each;
+- the shape: parts, narrator, whether chapters are argumentative (template A) or narrative (B).
 
-For each chapter file, write `notes/NNN-<slug>.md` using the template in
-`reference/layers.md`. Non-negotiables:
+Cap it at 500 words — it is pasted into every chapter agent that follows, so every word is paid for
+once per chapter. The agent returns the thesis line and the pillar list, nothing else.
+
+Read `state/recon.md` yourself; it is the one piece of book-derived text the orchestrator carries.
+It makes the chapter passes classify correctly instead of summarizing blindly.
+
+### Pass 2 — Chapter passes (one agent per chapter)
+
+**One subagent per chapter file, in waves of 4–6.** The orchestrator never opens a chapter. Each
+agent gets: the path to its own chapter file, the path where its notes go, `state/recon.md` inline,
+the depth, the output language, and the notes template from `reference/layers.md`. It gets no other
+chapter, no other notes file, and no page.
+
+It writes `notes/NNN-<slug>.md` and returns a receipt of at most 6 lines: the chapter's role in the
+argument, which candidate pillar it feeds (or that it feeds none), whether it is skip-safe, and any
+contradiction it noticed with the thesis it was handed. Not the notes.
+
+Non-negotiables inside the agent's prompt:
 
 - **Quotes are copy-paste, never generated.** Pull the exact string from the chapter file. If you
   cannot find it verbatim, the quote does not exist — drop it. Every quote carries `— ch.N`.
 - Bulleted, terms in **bold**, one idea per bullet. No paragraph prose.
 - Tag every bullet L1–L5 and `[book]`/`[analysis]`.
-- Record contradictions with earlier chapters as you hit them; you will need them in `critique.md`.
-- Do not read the whole book into context at once. One chapter file per Read; write its notes;
-  move on. Carry forward only the running thesis/pillar list.
+- Record contradictions with the thesis in `state/recon.md`, and with any earlier chapter it can see
+  named there; the cross-chapter contradictions the agent cannot see are found later, in the digest.
+- The chapter file is read once. Do not re-read it to polish.
+
+Two things a chapter agent cannot do, because it only sees one chapter: it cannot know a name was
+already glossed elsewhere, and it cannot see a contradiction with a chapter it never read. Both are
+handled after the fan-out, not by widening the agent's input.
+
+When every wave is done, roll the notes up into the digest:
+
+```bash
+python3 .claude/skills/book-distill/scripts/notes_digest.py library/<slug>
+```
+
+It writes `state/digest.md` — every chapter's L1–L3 claims, concepts, tensions and quote count, and
+nothing else, with the source note named on each entry. **That file, not `notes/`, is what passes 3
+and 4 read.** It warns when it passes 6k words; at that size drop to `--levels L1,L2` rather than
+letting synthesis start on a full context.
+
+Read the digest once and settle the argument on it: which candidates survive as L2 pillars, which
+chapters carry each, which tensions are real contradictions. Rewrite `state/recon.md` into the
+confirmed spine sketch — that is what pass 2.5 hands to the retelling agents.
 
 ### Pass 2.5 — Retelling (never skip this)
 
@@ -172,7 +248,34 @@ The unit is the point, not the chapter: split a chapter into 2–4 blocks, merge
 chapters into one entry. Chapter headings are claim-like — the book's own chapter title is not
 enough, because a title names a topic and the reader needs the point.
 
-Run the linter before moving on; it exits non-zero on any violation:
+**It is written one block per agent, and assembled by script.** The retelling is the longest file in
+the pack — at `deep` it is the book's length problem all over again — so no context writes it whole:
+
+1. **Blocks.** One subagent per chapter, waves of 4–6, writing `state/retelling/NNN-<slug>.md`. Each
+   gets its own chapter file, its own `notes/NNN-*.md`, the confirmed spine sketch, the depth, the
+   language, and `reference/retelling-standard.md`. The file starts with `### ` and contains that
+   entry only. The agent returns three lines: heading, word count, template A or B.
+2. **Front and tail.** Two more agents, off `state/digest.md` and the spine sketch — never off the
+   chapters. One writes `state/retelling/front.md` (what the book is, cast, how the world works),
+   one writes `state/retelling/tail.md` (key scenes, timeline, self-check). The scenes agent needs
+   verbatim quotes, so it gets the chapter files its scenes come from, named by the digest.
+3. **Assemble.**
+
+```bash
+python3 .claude/skills/book-distill/scripts/build_retelling.py library/<slug>
+```
+
+It stitches front matter, the numbered blocks in order and the tail into `library/<slug>/retelling.md`,
+and refuses to write a file the linter would reject outright: a block that does not open with `### `,
+a duplicated number, an empty front matter. It warns on gaps in the numbering. Rerun it after every
+block edit — `retelling.md` is generated, so edit the block file, never the assembled file.
+
+Because the block agents run blind to each other, expect two artefacts and fix them here: a name may
+be glossed in more than one chapter (harmless, thin it out where it reads as repetition), and two
+chapters may open the same way (rewrite one). A term that is glossed **nowhere** is a linter finding,
+below.
+
+Run the linter on the assembled file; it exits non-zero on any violation:
 
 ```bash
 python3 .claude/skills/book-distill/scripts/retell_lint.py library/<slug>/retelling.md --depth <depth>
@@ -182,7 +285,13 @@ It checks blocks per chapter, word budget, the words spent on position and mecha
 length and its spread, density of names and numbers, spelled-out numerals, both halves of every
 evidence bullet, unglossed first mentions, chain openers ("then", "next", "separately"…), causal
 connectives, topic chaining, the forward link, and that `[analysis]` never sits inside a `[book]`
-block. It cannot see a lost point — list them from `notes/` and confirm each one by eye.
+block. It cannot see a lost point — check the points against `state/digest.md`, which lists them
+per chapter, and send a repair agent at any block that dropped one.
+
+The linter runs **once, here, in the orchestrator** — never inside the block agents. Its findings are
+per chapter, so route each chapter's findings back to one repair agent holding that block file and
+those lines. That is one write, one lint, one repair; the loop-inside-the-agent version cost 3.2M
+tokens for eleven chapters.
 
 ### Pass 2.6 — Cold read (the comprehension gate)
 
@@ -212,8 +321,18 @@ It answers, in the pack's language:
 
 A chapter passes when 1–3 are answered correctly and 4–5 come back empty. Anything in 4 or 5 is a
 defect in the text, never in the reader: gloss the term, split the sentence, restore the missing
-step, and send the chapter back through. Record the outcome in `book.json` under
-`verification.cold_read` — chapters passed, chapters revised, and what the readers flagged.
+step, and send the chapter back through — as a repair agent on that block file, not as an edit made
+here.
+
+**The reader returns a verdict, not a transcript**: `pass`, or the flagged terms and the quoted
+sentences, capped at ten lines. Answers 1–3 are how it convinces itself; they do not come back
+unless the verdict is `fail`, and then only the one that went wrong. Append the verdicts to
+`state/cold-read.md`, one line per chapter — that file is the pass's record and the thing you
+reread, not forty agent replies. Record the totals in `book.json` under `verification.cold_read`:
+chapters passed, chapters revised, and what the readers flagged.
+
+Repairs change `state/retelling/NNN-*.md`, so rerun `build_retelling.py` and `retell_lint.py` after
+the round, and cold-read only the chapters that were rewritten.
 
 Do not skip this pass because the linter is green. Green mechanics with a failed cold read is the
 exact failure mode this gate exists for.
@@ -230,8 +349,14 @@ the map and the critique.
 
 ### Pass 3 — Synthesis
 
-From the notes only (not the raw book), write `spine.md`, `argument-map.md`, `quotes.md`,
-`critique.md`. Templates in `reference/layers.md`.
+From `state/digest.md` and `state/recon.md` — not the raw book, and not the notes files themselves —
+write `spine.md`, `argument-map.md`, `quotes.md`, `critique.md`. Templates in `reference/layers.md`.
+The digest names the source note for every claim, so when one claim needs its full context, open that
+one note; opening all of them is how this pass ends up holding the book again.
+
+`quotes.md` is the exception that still needs the book: the quotes already exist verbatim in
+`notes/`, so build it with a script or a subagent that greps the note files for quote blocks, ranks
+them and writes the file — never by rereading `source/`.
 
 `critique.md` is what separates this from every summary app — be genuinely adversarial:
 what would have to be true for the thesis to fail, which evidence is anecdote dressed as data,
@@ -270,12 +395,17 @@ python .claude/skills/book-distill/scripts/make_cards.py "library/<book-slug>/ca
 Card count by depth: quick ~15, standard ~40, deep ~80. Cards test *understanding and transfer*,
 never trivia ("what year was the study?" is a bad card).
 
+At `deep` this is eighty cards and it fans out too: one agent per pillar, each holding `spine.md`,
+the digest entries for that pillar's chapters and its share of the count, each writing
+`state/cards/PN.md`. Concatenate into `cards.md`, then dedupe by hand — sibling agents produce near
+twins around a shared concept — and only then run `make_cards.py`.
+
 ### Pass 5 — Interactive page
 
 **The page has one skeleton, shared by every book distilled from now on.** It lives in
 `reference/page-template.html`: a single scroll with a collapsible left menu and nine sections in
-a fixed order — `pereskaz`, `lestnica`, `karta`, `citaty`, `kritiki`, `razbor`, `povtorenie`,
-`primenenie`, `svyazi`. Fill its `{{PLACEHOLDER}}` slots; never invent a section order, rename an
+a fixed order — `retelling`, `pillars`, `map`, `quotes`, `reception`, `critique`, `recall`,
+`apply`, `links`. Fill its `{{PLACEHOLDER}}` slots; never invent a section order, rename an
 id or drop a section. Depth changes how densely the sections are filled, not how many there are.
 
 `library/1984/` and `library/frankenstein/` were built before this skeleton and keep the pages
@@ -293,6 +423,13 @@ components: the claim becomes `p.lead`, the fixed slots keep the mono `span.lbl`
 per-chapter labels of the position and mechanism blocks become `span.say` (sentence case, serif —
 a claim is not a slot name), evidence becomes a `ul`, and `> **разбор.**` becomes `p.an-block`.
 Run it again after any edit to the retelling, so the two never drift apart.
+
+The rest of the page is filled the same way the retelling was: **the orchestrator never holds the
+whole page.** Copy the template, run `build_chaps.py` for the chapter block, and fill the remaining
+`{{PLACEHOLDER}}` slots one at a time — each from the pack file that backs it (`spine.md`,
+`argument-map.md`, `quotes.md`, `reception.md`, `critique.md`, `cards.md`, `apply.md`, `links.md`),
+written straight into the file with a small script or an agent that returns only which slot it
+filled. Read the page back only through `page_lint.py` and a screenshot.
 
 **Two of the nine sections are graphs, not prose.** They are what makes the argument readable at a
 glance, so they are built the same way in every pack:
@@ -479,8 +616,11 @@ The user can ask for a single stage instead of the whole pipeline:
    left menu, and the same node graphs in the pillars and map sections. Per book only the content,
    the depth and the palette change — and the palette comes from that book's cover. The two packs
    that predate the skeleton, `1984` and `frankenstein`, keep their pages.
-9. The chapter retelling follows `reference/retelling-standard.md` and passes `retell_lint.py`
+9. The orchestrator does not read book text. Chapters, notes and retelling blocks are read by
+   subagents that write files and return receipts; the orchestrator lives on `state/`, the manifest
+   and linter output. A pass that needs the whole book in one context is a pass that needs splitting.
+10. The chapter retelling follows `reference/retelling-standard.md` and passes `retell_lint.py`
    before pass 3 starts. A chapter written as one dense paragraph, opening on a detail instead of a
    claim and chained with "then", is a defect however accurate it is.
-10. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
+11. Pass 5 runs with the `ui-ux-pro-max` skill loaded. It is not optional and not a remedy applied
    after the page turns out wrong.
