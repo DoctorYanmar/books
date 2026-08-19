@@ -22,6 +22,10 @@ from pathlib import Path
 ROLE = re.compile(r"^\*\*(?:Role in the argument|Роль в аргументе)[:：]\*\*\s*(.+)$", re.I)
 SKIP = re.compile(r"^\*\*(?:Skip-safe|Можно пропустить)[:：]\*\*\s*([^<]+)", re.I)
 CLAIM = re.compile(r"^[-*]\s+\*\*(L[1-5])\*\*\s*(.+)$")
+# Packs written before the template settled hang the level on the end of the bullet
+# instead of the front: "- **Claim.** … L2 [book]". Both shapes are read.
+LOOSE = re.compile(r"(?:^|[\s(])\*{0,2}(L[1-5])\*{0,2}(?=[\s)\[.,;:—-]|$)")
+LEVEL_STRIP = re.compile(r"\s*\*{0,2}L[1-5]\*{0,2}\s*(?=\[|$)")
 BULLET = re.compile(r"^[-*]\s+(.+)$")
 TERM = re.compile(r"\*\*(.+?)\*\*")
 HEAD = re.compile(r"^##\s+(.+)$")
@@ -75,11 +79,21 @@ def parse(path, levels, claim_chars):
         if m:
             note["skip"] = m.group(1).strip()
             continue
-        if current == "claims":
+        bullet = BULLET.match(line)
+        if bullet and current not in ("concepts", "tensions", "open"):
             m = CLAIM.match(line)
-            if m and m.group(1) in levels:
-                note["claims"].append((m.group(1), trim(m.group(2), claim_chars)))
-        elif current == "concepts":
+            if m:
+                level, text = m.group(1), m.group(2)
+            else:
+                loose = LOOSE.search(bullet.group(1))
+                if not loose:
+                    continue
+                level = loose.group(1)
+                text = LEVEL_STRIP.sub(" ", bullet.group(1))
+            if level in levels:
+                note["claims"].append((level, trim(text, claim_chars)))
+            continue
+        if current == "concepts":
             m = BULLET.match(line)
             if m:
                 term = TERM.search(m.group(1))
