@@ -424,6 +424,23 @@ per-chapter labels of the position and mechanism blocks become `span.say` (sente
 a claim is not a slot name), evidence becomes a `ul`, and `> **разбор.**` becomes `p.an-block`.
 Run it again after any edit to the retelling, so the two never drift apart.
 
+**The claim map is generated too, like the chapter articles.** `argument-map.md` already carries one
+block per pillar with the same five fields, so the graph and the table behind it are derived from it
+rather than typed:
+
+```bash
+python3 .claude/skills/book-distill/scripts/build_map.py library/<slug>
+```
+
+It writes `state/slots-map.json` with `FLOW_MAP`, `FLOW_NOTE_MAP`, `MAP_TABLE` and `MAP_NOTES`, and
+reads which pillars are load-bearing out of the file's own closing section, so the map cannot drift
+from the pack or from the pillars graph. Rerun it after any edit to `argument-map.md`.
+
+**Keep one numbering.** `spine.md` is the ladder of record: `argument-map.md`, `critique.md`, the
+cards and both graphs use its `P1…Pn` identifiers and its wording. A pack whose map numbers pillars
+its own way shows the reader two different sets under the same names — check this before publishing,
+because neither linter can see it.
+
 The rest of the page is filled the same way the retelling was: **the orchestrator never holds the
 whole page.** Copy the template, run `build_chaps.py` for the chapter block, and fill the remaining
 `{{PLACEHOLDER}}` slots one at a time — each from the pack file that backs it (`spine.md`,
